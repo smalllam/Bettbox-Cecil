@@ -167,6 +167,19 @@ begin
   end;
 end;
 
+procedure CleanLegacyProtocols;
+var
+  ProtocolKeys: TArrayOfString;
+  i: Integer;
+begin
+  ProtocolKeys := ['Software\Classes\clash', 'Software\Classes\clashmeta', 'Software\Classes\bettbox'];
+
+  for i := 0 to GetArrayLength(ProtocolKeys)-1 do
+  begin
+    RegDeleteKeyIncludingSubkeys(HKCU, ProtocolKeys[i]);
+  end;
+end;
+
 procedure CleanUserData;
 var
   UserDataPaths: TArrayOfString;
@@ -225,6 +238,7 @@ begin
 
   if CurStep = ssPostInstall then
   begin
+    CleanLegacyProtocols;
     RegisterHelperService;
   end;
 end;

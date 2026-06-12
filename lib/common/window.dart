@@ -20,6 +20,7 @@ class Window {
       exit(0);
     }
     if (system.isWindows) {
+      protocol.unregisterAll(const ['clash', 'clashmeta', 'bettbox']);
       protocol.register(whiteLabelUriScheme);
     }
     await windowManager.ensureInitialized();

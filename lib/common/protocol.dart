@@ -24,6 +24,21 @@ class Protocol {
     regKey.createValue(protocolRegValue);
     regKey.createKey(protocolCmdRegKey).createValue(protocolCmdRegValue);
   }
+
+  void unregister(String scheme) {
+    try {
+      Registry.currentUser.deleteKey(
+        'Software\\Classes\\$scheme',
+        recursive: true,
+      );
+    } catch (_) {}
+  }
+
+  void unregisterAll(Iterable<String> schemes) {
+    for (final scheme in schemes) {
+      unregister(scheme);
+    }
+  }
 }
 
 final protocol = Protocol();

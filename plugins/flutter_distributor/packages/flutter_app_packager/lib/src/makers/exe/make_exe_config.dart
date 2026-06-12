@@ -16,6 +16,7 @@ class MakeExeConfig extends MakeConfig {
     this.installDirName,
     this.setupIconFile,
     this.privilegesRequired,
+    this.uriScheme,
     this.locales,
   });
 
@@ -25,7 +26,7 @@ class MakeExeConfig extends MakeConfig {
         : null;
     if (locales == null || locales.isEmpty) {
       locales = [
-        {'lang': 'en'}
+        {'lang': 'en'},
       ];
     }
 
@@ -41,6 +42,7 @@ class MakeExeConfig extends MakeConfig {
       installDirName: json['install_dir_name'],
       setupIconFile: json['setup_icon_file'],
       privilegesRequired: json['privileges_required'],
+      uriScheme: json['uri_scheme'] ?? json['uriScheme'],
       locales: locales,
     );
     return makeExeConfig;
@@ -57,6 +59,7 @@ class MakeExeConfig extends MakeConfig {
   String? installDirName;
   String? setupIconFile;
   String? privilegesRequired;
+  String? uriScheme;
   List<Map<String, dynamic>>? locales;
 
   String get defaultExecutableName {
@@ -92,6 +95,7 @@ class MakeExeConfig extends MakeConfig {
       'install_dir_name': installDirName,
       'setup_icon_file': setupIconFile,
       'privileges_required': privilegesRequired,
+      'uri_scheme': uriScheme,
       'locales': locales,
     }..removeWhere((key, value) => value == null);
   }

@@ -73,14 +73,10 @@ Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLA
 """;
 
 class InnoSetupScript {
-  InnoSetupScript({
-    required this.makeConfig,
-  });
+  InnoSetupScript({required this.makeConfig});
 
   factory InnoSetupScript.fromMakeConfig(MakeExeConfig makeConfig) {
-    return InnoSetupScript(
-      makeConfig: makeConfig,
-    );
+    return InnoSetupScript(makeConfig: makeConfig);
   }
 
   final MakeExeConfig makeConfig;
@@ -105,6 +101,7 @@ class InnoSetupScript {
       'LOCALES': makeConfig.locales,
       'SETUP_ICON_FILE': makeConfig.setupIconFile ?? '',
       'PRIVILEGES_REQUIRED': makeConfig.privilegesRequired ?? 'none',
+      'URI_SCHEME': makeConfig.uriScheme,
     }..removeWhere((key, value) => value == null);
 
     Context context = Context.create();
@@ -113,10 +110,7 @@ class InnoSetupScript {
     String scriptTemplate = _template;
     if (makeConfig.scriptTemplate != null) {
       File scriptTemplateFile = File(
-        path.join(
-          'windows/packaging/exe/',
-          makeConfig.scriptTemplate!,
-        ),
+        path.join('windows/packaging/exe/', makeConfig.scriptTemplate!),
       );
       scriptTemplate = scriptTemplateFile.readAsStringSync();
     }
