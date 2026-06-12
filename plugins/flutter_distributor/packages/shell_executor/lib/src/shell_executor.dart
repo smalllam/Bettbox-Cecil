@@ -34,13 +34,14 @@ class ShellExecutor {
     String? stdoutStr;
     String? stderrStr;
 
+    const outputDecoder = Utf8Decoder(allowMalformed: true);
     process.stdout.listen((event) {
-      String msg = utf8.decoder.convert(event);
+      String msg = outputDecoder.convert(event);
       stdoutStr = '${stdoutStr ?? ''}$msg';
       stdout.write(msg);
     });
     process.stderr.listen((event) {
-      String msg = utf8.decoder.convert(event);
+      String msg = outputDecoder.convert(event);
       stderrStr = '${stderrStr ?? ''}$msg';
       stderr.write(msg);
     });

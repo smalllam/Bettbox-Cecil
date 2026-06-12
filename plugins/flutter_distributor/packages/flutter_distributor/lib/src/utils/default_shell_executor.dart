@@ -25,12 +25,15 @@ class DefaultShellExecutor extends ShellExecutor {
     String? workingDirectory,
     Map<String, String>? environment,
   }) async {
+    final executableLower = executable.toLowerCase();
+    final runInShell = Platform.isWindows &&
+        !(executableLower.endsWith('.exe') || executableLower.endsWith('.com'));
     final Process process = await Process.start(
       executable,
       arguments,
       workingDirectory: workingDirectory,
       environment: environment,
-      runInShell: true,
+      runInShell: runInShell,
     );
 
     logger.info('\$ $executable ${arguments.join(' ')}'.brightBlack());
