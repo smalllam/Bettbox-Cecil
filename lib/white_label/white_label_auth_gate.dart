@@ -487,7 +487,7 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
                 icon: const Icon(Icons.open_in_new),
                 label: Text(localized('打开官网', '開啟官網', 'Open website')),
               ),
-            if (whiteLabelSupportUrl.isNotEmpty)
+            if (hasWhiteLabelSupportTarget)
               TextButton.icon(
                 onPressed: _loading ? null : _openSupport,
                 icon: const Icon(Icons.support_agent),

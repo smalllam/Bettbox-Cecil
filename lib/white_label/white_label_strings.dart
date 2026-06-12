@@ -108,6 +108,11 @@ class WhiteLabelStrings {
     '付款頁面無法安全開啟',
     'The payment page could not be opened securely',
   );
+  String get paymentAppMissing => _t(
+    '无法打开支付应用，请确认已安装微信或支付宝。',
+    '無法開啟付款應用，請確認已安裝微信或支付寶。',
+    'Could not open the payment app. Please make sure it is installed.',
+  );
   String get servicesAndAccount => _t('服务与账号', '服務與帳號', 'Services and account');
   String get tapToExpand => _t('点击展开', '點擊展開', 'Tap to expand');
   String get tapToCollapse => _t('点击收起', '點擊收起', 'Tap to collapse');
@@ -115,6 +120,33 @@ class WhiteLabelStrings {
       _t('刷新订阅', '重新整理訂閱', 'Refresh subscription');
   String get subscriptionUpdated =>
       _t('订阅已更新', '訂閱已更新', 'Subscription updated');
+  String get allPlans => _t('全部套餐', '全部方案', 'All plans');
+  String get byPeriod => _t('按周期', '按週期', 'By period');
+  String get byTraffic => _t('按流量', '按流量', 'By traffic');
+  String get monthly => _t('月付', '月付', 'Monthly');
+  String get yearly => _t('年付', '年付', 'Yearly');
+  String get quarterly => _t('季付', '季付', 'Quarterly');
+  String get halfYear => _t('半年付', '半年付', 'Half-year');
+  String get twoYears => _t('两年付', '兩年付', 'Two years');
+  String get threeYears => _t('三年付', '三年付', 'Three years');
+  String get oneTime => _t('一次性', '一次性', 'One-time');
+  String get resetTraffic => _t('重置流量', '重置流量', 'Reset traffic');
+  String get subscribe => _t('订阅', '訂閱', 'Subscribe');
+  String get featured => _t('招牌', '招牌', 'Featured');
+  String get popular => _t('实惠', '實惠', 'Popular');
+  String get value => _t('超值', '超值', 'Value');
+  String get recommended => _t('推荐', '推薦', 'Recommended');
+  String get statusPending => _t('待支付', '待付款', 'Pending');
+  String get statusCompleted => _t('已完成', '已完成', 'Completed');
+  String get statusCancelled => _t('已取消', '已取消', 'Cancelled');
+  String get statusClosed => _t('已关闭', '已關閉', 'Closed');
+  String get statusProcessing => _t('处理中', '處理中', 'Processing');
+  String get cancelOrder => _t('取消订单', '取消訂單', 'Cancel order');
+  String get cancelOrderConfirm =>
+      _t('确定取消这个待支付订单吗？', '確定取消這個待付款訂單嗎？', 'Cancel this pending order?');
+  String get confirm => _t('确认', '確認', 'Confirm');
+  String get orderCancelled => _t('订单已取消', '訂單已取消', 'Order cancelled');
+  String get viewImage => _t('查看图片', '查看圖片', 'View image');
 }
 
 WhiteLabelStrings whiteLabelStringsOf(BuildContext context) {

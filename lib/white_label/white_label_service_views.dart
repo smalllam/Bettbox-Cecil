@@ -31,28 +31,28 @@ String _money(int cents) => 'CNY ${(cents / 100).toStringAsFixed(2)}';
 String _traffic(int gb) => gb <= 0 ? '-' : '$gb GB';
 
 String _periodLabel(BuildContext context, String key) {
-  const enLabels = {
-    'month_price': 'Monthly',
-    'monthly_price': 'Monthly',
-    'quarter_price': 'Quarterly',
-    'quarterly_price': 'Quarterly',
-    'half_year_price': 'Half-year',
-    'year_price': 'Yearly',
-    'two_year_price': 'Two years',
-    'three_year_price': 'Three years',
-    'onetime_price': 'One-time',
-    'reset_price': 'Reset traffic',
+  final strings = whiteLabelStringsOf(context);
+  return switch (key) {
+    'month_price' || 'monthly_price' => strings.monthly,
+    'quarter_price' || 'quarterly_price' => strings.quarterly,
+    'half_year_price' => strings.halfYear,
+    'year_price' => strings.yearly,
+    'two_year_price' => strings.twoYears,
+    'three_year_price' => strings.threeYears,
+    'onetime_price' => strings.oneTime,
+    'reset_price' => strings.resetTraffic,
+    _ => key,
   };
-  return enLabels[key] ?? key;
 }
 
 String _orderStatus(BuildContext context, int status) {
+  final strings = whiteLabelStringsOf(context);
   return switch (status) {
-    0 => 'Pending',
-    1 => 'Completed',
-    2 => 'Cancelled',
-    3 => 'Closed',
-    _ => 'Processing',
+    0 => strings.statusPending,
+    1 => strings.statusCompleted,
+    2 => strings.statusCancelled,
+    3 => strings.statusClosed,
+    _ => strings.statusProcessing,
   };
 }
 
@@ -548,17 +548,17 @@ class _PlanFilters extends StatelessWidget {
           child: Row(
             children: [
               _PlanCategoryTab(
-                label: 'All plans',
+                label: whiteLabelStringsOf(context).allPlans,
                 selected: category == _PlanCategory.all,
                 onTap: () => onCategoryChanged(_PlanCategory.all),
               ),
               _PlanCategoryTab(
-                label: 'Recurring',
+                label: whiteLabelStringsOf(context).byPeriod,
                 selected: category == _PlanCategory.recurring,
                 onTap: () => onCategoryChanged(_PlanCategory.recurring),
               ),
               _PlanCategoryTab(
-                label: 'Traffic',
+                label: whiteLabelStringsOf(context).byTraffic,
                 selected: category == _PlanCategory.traffic,
                 onTap: () => onCategoryChanged(_PlanCategory.traffic),
               ),
@@ -573,14 +573,14 @@ class _PlanFilters extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Yearly'),
+                  Text(whiteLabelStringsOf(context).yearly),
                   Switch(
                     value: cycle == _PlanCycle.monthly,
                     onChanged: (monthly) => onCycleChanged(
                       monthly ? _PlanCycle.monthly : _PlanCycle.yearly,
                     ),
                   ),
-                  const Text('Monthly'),
+                  Text(whiteLabelStringsOf(context).monthly),
                 ],
               ),
             ),
@@ -676,13 +676,13 @@ class _WhiteLabelPlanCard extends StatelessWidget {
   ({String label, Color color}) get _badge {
     final lowerName = plan.name.toLowerCase();
     if (lowerName.contains('team')) {
-      return (label: 'Value', color: const Color(0xFF00A45A));
+      return (label: 'value', color: const Color(0xFF00A45A));
     }
     if (lowerName.contains('month')) {
-      return (label: 'Popular', color: const Color(0xFF00A7AD));
+      return (label: 'popular', color: const Color(0xFF00A7AD));
     }
     return (
-      label: index == 0 ? 'Featured' : 'Recommended',
+      label: index == 0 ? 'featured' : 'recommended',
       color: const Color(0xFFFF4B3E),
     );
   }
@@ -691,6 +691,13 @@ class _WhiteLabelPlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final price = selectedPrice ?? _lowestPrice;
     final badge = _badge;
+    final strings = whiteLabelStringsOf(context);
+    final badgeText = switch (badge.label) {
+      'value' => strings.value,
+      'popular' => strings.popular,
+      'featured' => strings.featured,
+      _ => strings.recommended,
+    };
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
@@ -723,7 +730,7 @@ class _WhiteLabelPlanCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       child: Text(
-                        badge.label,
+                        badgeText,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -776,7 +783,7 @@ class _WhiteLabelPlanCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      child: const Text('Subscribe'),
+                      child: Text(strings.subscribe),
                     ),
                   ),
                 ],
@@ -981,8 +988,8 @@ class _WhiteLabelOrderDetailsViewState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel order'),
-        content: const Text('Cancel this pending order?'),
+        title: Text(whiteLabelStringsOf(context).cancelOrder),
+        content: Text(whiteLabelStringsOf(context).cancelOrderConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -990,7 +997,7 @@ class _WhiteLabelOrderDetailsViewState
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirm'),
+            child: Text(whiteLabelStringsOf(context).confirm),
           ),
         ],
       ),
@@ -1000,7 +1007,7 @@ class _WhiteLabelOrderDetailsViewState
     try {
       await WhiteLabelApi.cancelOrder(await _activeSession(), widget.tradeNo);
       if (!mounted) return;
-      globalState.showNotifier('Order cancelled');
+      globalState.showNotifier(whiteLabelStringsOf(context).orderCancelled);
       await _refresh();
     } catch (error) {
       if (mounted) await _showPaymentError(error.toString());
@@ -1092,11 +1099,7 @@ class _WhiteLabelOrderDetailsViewState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.close),
-                  label: Text(
-                    Localizations.localeOf(context).languageCode == 'zh'
-                        ? 'Cancel order'
-                        : 'Cancel order',
-                  ),
+                  label: Text(strings.cancelOrder),
                 ),
               ],
             ],
@@ -1162,11 +1165,7 @@ class _WhiteLabelPaymentViewState extends State<_WhiteLabelPaymentView> {
       opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
     if (!opened && mounted) {
-      globalState.showNotifier(
-        Localizations.localeOf(context).languageCode == 'zh'
-            ? 'Could not open the payment app. Please make sure it is installed.'
-            : 'Could not open the payment app. Please make sure it is installed.',
-      );
+      globalState.showNotifier(whiteLabelStringsOf(context).paymentAppMissing);
     }
   }
 

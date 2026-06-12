@@ -51,7 +51,11 @@ const _whiteLabelConfigTxtHost = String.fromEnvironment(
   defaultValue: MerchantConfig.dnsHost,
 );
 const whiteLabelConfigCiphertext = String.fromEnvironment('CONFIG_CIPHERTEXT');
-const whiteLabelDisclaimerText = String.fromEnvironment('DISCLAIMER_TEXT');
+const whiteLabelDisclaimerText = String.fromEnvironment(
+  'DISCLAIMER_TEXT',
+  defaultValue:
+      'Cecil 仅为本服务用户提供网络连接与订阅管理工具。请遵守所在地区法律法规及服务条款，不得用于违法违规用途。继续使用即表示你已阅读并同意本声明。',
+);
 
 const whiteLabelAuthTokenKey = 'white_label_auth_token';
 const whiteLabelAuthDataKey = 'white_label_auth_data';

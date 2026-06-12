@@ -6,7 +6,6 @@ import 'package:bett_box/manager/window_manager.dart';
 import 'package:bett_box/plugins/app.dart';
 import 'package:bett_box/providers/providers.dart';
 import 'package:bett_box/state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,7 +137,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   bool get _shouldCheckMissedUpdates {
     if (_lastMissedUpdateCheck == null) return true;
-    return DateTime.now().difference(_lastMissedUpdateCheck!) > _missedUpdateCheckThrottle;
+    return DateTime.now().difference(_lastMissedUpdateCheck!) >
+        _missedUpdateCheckThrottle;
   }
 
   void _scheduleMissedUpdateCheck() {
@@ -152,7 +152,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    final isBackgroundState = state == AppLifecycleState.paused ||
+    final isBackgroundState =
+        state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         (state == AppLifecycleState.inactive && !system.isDesktop);
 
@@ -179,7 +180,9 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (state == AppLifecycleState.resumed && system.isAndroid) {
       final hidden = ref.read(appSettingProvider.select((s) => s.hidden));
       app.updateExcludeFromRecents(hidden);
-      SystemChrome.setSystemUIOverlayStyle(globalState.appState.systemUiOverlayStyle);
+      SystemChrome.setSystemUIOverlayStyle(
+        globalState.appState.systemUiOverlayStyle,
+      );
     }
     if (state == AppLifecycleState.inactive) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -208,22 +211,6 @@ class AppEnvManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode) {
-      if (globalState.isPre) {
-        return Banner(
-          message: 'DEBUG',
-          location: BannerLocation.topEnd,
-          child: child,
-        );
-      }
-    }
-    if (globalState.isPre) {
-      return Banner(
-        message: 'PRE',
-        location: BannerLocation.topEnd,
-        child: child,
-      );
-    }
     return child;
   }
 }
@@ -252,10 +239,7 @@ class AppSidebarContainer extends ConsumerWidget {
     required BuildContext context,
     required Widget child,
   }) {
-    return Material(
-      color: context.colorScheme.surfaceContainer,
-      child: child,
-    );
+    return Material(color: context.colorScheme.surfaceContainer, child: child);
   }
 
   @override
@@ -284,28 +268,37 @@ class AppSidebarContainer extends ConsumerWidget {
                   children: [
                     if (system.isMacOS) const SizedBox(height: 22),
                     const SizedBox(height: 16),
-                    if (!system.isMacOS) ...[const AppIcon(), const SizedBox(height: 12)],
+                    if (!system.isMacOS) ...[
+                      const AppIcon(),
+                      const SizedBox(height: 12),
+                    ],
                     Expanded(
                       child: ScrollConfiguration(
                         behavior: HiddenBarScrollBehavior(),
                         child: CallbackShortcuts(
                           bindings: <ShortcutActivator, VoidCallback>{
-                            const SingleActivator(LogicalKeyboardKey.arrowUp): () {
+                            const SingleActivator(
+                              LogicalKeyboardKey.arrowUp,
+                            ): () {
                               if (currentIndex > 0) {
                                 globalState.appController.toPage(
                                   navigationItems[currentIndex - 1].label,
                                 );
                               }
                             },
-                            const SingleActivator(LogicalKeyboardKey.arrowDown): () {
+                            const SingleActivator(
+                              LogicalKeyboardKey.arrowDown,
+                            ): () {
                               if (currentIndex < navigationItems.length - 1) {
                                 globalState.appController.toPage(
                                   navigationItems[currentIndex + 1].label,
                                 );
                               }
                             },
-                            const SingleActivator(LogicalKeyboardKey.select): () {},
-                            const SingleActivator(LogicalKeyboardKey.enter): () {},
+                            const SingleActivator(LogicalKeyboardKey.select):
+                                () {},
+                            const SingleActivator(LogicalKeyboardKey.enter):
+                                () {},
                           },
                           child: Focus(
                             autofocus: true,
@@ -358,4 +351,3 @@ class AppSidebarContainer extends ConsumerWidget {
     );
   }
 }
-

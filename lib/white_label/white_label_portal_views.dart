@@ -141,7 +141,7 @@ class WhiteLabelRichContent extends StatelessWidget {
           return TextButton.icon(
             onPressed: () => globalState.openUrl(resolved.toString()),
             icon: const Icon(Icons.image_outlined),
-            label: const Text('View image'),
+            label: Text(whiteLabelStringsOf(context).viewImage),
           );
         }
         return const SizedBox.shrink();
@@ -163,6 +163,29 @@ class _WhiteLabelNetworkImage extends StatefulWidget {
 class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
   late final Future<Uint8List> _future = _load();
 
+  Uri _resolveSource() {
+    final source = widget.source.trim();
+    final direct = Uri.tryParse(source);
+    if (direct != null && direct.hasScheme) return direct;
+    final encoded = Uri.tryParse(Uri.encodeFull(source));
+    if (encoded != null && encoded.hasScheme) return encoded;
+    return Uri.parse('$whiteLabelPanelBaseUrl/').resolve(source);
+  }
+
+  Uint8List? _dataUriBytes(String source) {
+    final match = RegExp(
+      r'''^data:[^;,]+;base64,(.+)$''',
+      caseSensitive: false,
+      dotAll: true,
+    ).firstMatch(source.trim());
+    if (match == null) return null;
+    try {
+      return base64Decode(match.group(1)!.replaceAll(RegExp(r'\s+'), ''));
+    } catch (_) {
+      return null;
+    }
+  }
+
   Uint8List? _embeddedRaster(Uint8List svgBytes) {
     final svg = utf8.decode(svgBytes, allowMalformed: true);
     final match = RegExp(
@@ -178,7 +201,9 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
   }
 
   Future<Uint8List> _load() async {
-    final url = Uri.parse('$whiteLabelPanelBaseUrl/').resolve(widget.source);
+    final dataBytes = _dataUriBytes(widget.source);
+    if (dataBytes != null) return dataBytes;
+    final url = _resolveSource();
     Object? lastError;
     for (final referer in [
       if (whiteLabelHomeUrl.isNotEmpty) '$whiteLabelHomeUrl/',
@@ -193,7 +218,8 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
             receiveTimeout: const Duration(seconds: 25),
             headers: {
               'User-Agent': browserUa,
-              'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+              'Accept':
+                  'image/svg+xml,image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
               'Referer': ?referer,
             },
           ),
@@ -215,9 +241,7 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final resolved = Uri.parse(
-            '$whiteLabelPanelBaseUrl/',
-          ).resolve(widget.source);
+          final resolved = _resolveSource();
           final isSvg = resolved.path.toLowerCase().endsWith('.svg');
           final embeddedRaster = isSvg ? _embeddedRaster(snapshot.data!) : null;
           return Padding(
@@ -254,11 +278,11 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
   }
 
   Widget _fallback() {
-    final url = Uri.parse('$whiteLabelPanelBaseUrl/').resolve(widget.source);
+    final url = _resolveSource();
     return TextButton.icon(
       onPressed: () => globalState.openUrl(url.toString()),
       icon: const Icon(Icons.image_outlined),
-      label: const Text('View image'),
+      label: Text(whiteLabelStringsOf(context).viewImage),
     );
   }
 }

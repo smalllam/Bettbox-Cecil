@@ -13,6 +13,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 final whiteLabelSupportBubbleVisible = ValueNotifier<bool>(false);
 Webview? _whiteLabelSupportWebview;
 
+bool get hasWhiteLabelSupportTarget => _hasSupportTarget;
+
 Future<void> openWhiteLabelSupport(
   BuildContext context, {
   bool showBubbleOnBack = true,

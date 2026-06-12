@@ -1107,10 +1107,10 @@ class AppController {
                     .updateState(
                       (state) => state.copyWith(disclaimerAccepted: true),
                     );
-                await preferences.saveConfig(globalState.config);
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop<bool>(true);
                 }
+                unawaited(preferences.saveConfig(globalState.config));
               },
               child: Text(appLocalizations.agree),
             ),

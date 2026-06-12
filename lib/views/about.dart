@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/white_label/white_label_strings.dart';
-import 'package:bett_box/white_label/white_label_update.dart';
 import 'package:bett_box/common/common.dart';
 import 'package:bett_box/providers/config.dart';
 import 'package:bett_box/state.dart';
@@ -15,9 +14,6 @@ class AboutView extends StatelessWidget {
 
   List<Widget> _buildMoreSection(BuildContext context) {
     final strings = whiteLabelStringsOf(context);
-    final canUpdate =
-        (system.isAndroid && whiteLabelAndroidUpdateUrl.isNotEmpty) ||
-        (system.isWindows && whiteLabelWindowsUpdateUrl.isNotEmpty);
     return generateSection(
       separated: false,
       title: appLocalizations.more,
@@ -30,15 +26,6 @@ class AboutView extends StatelessWidget {
               globalState.openUrl(whiteLabelHomeUrl);
             },
             trailing: const Icon(Icons.launch),
-          ),
-        if (canUpdate)
-          ListItem(
-            title: const Text('Online update'),
-            subtitle: const Text('Download and install the latest version'),
-            onTap: () {
-              WhiteLabelUpdateService.checkAndPrompt();
-            },
-            trailing: const Icon(Icons.system_update_alt),
           ),
       ],
     );

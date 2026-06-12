@@ -186,13 +186,15 @@ class _WhiteLabelAccountSectionState
                   ),
                   const Divider(height: 0),
                 ],
-                ListItem(
-                  leading: const Icon(Icons.support_agent_outlined),
-                  title: Text(strings.support),
-                  subtitle: Text(strings.onlineSupport),
-                  onTap: _openSupport,
-                ),
-                const Divider(height: 0),
+                if (hasWhiteLabelSupportTarget) ...[
+                  ListItem(
+                    leading: const Icon(Icons.support_agent_outlined),
+                    title: Text(strings.support),
+                    subtitle: Text(strings.onlineSupport),
+                    onTap: _openSupport,
+                  ),
+                  const Divider(height: 0),
+                ],
                 ListItem(
                   leading: _loggingOut
                       ? const SizedBox(
