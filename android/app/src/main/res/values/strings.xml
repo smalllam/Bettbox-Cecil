@@ -1,0 +1,8 @@
+<resources>
+    <string name="bett_box">Airport Client</string>
+    <string name="bett_box_debug">Airport Client Debug</string>
+    <string name="core_connected">Connected</string>
+    <string name="service_running">Service is running</string>
+    <string name="core_suspended">Suspended</string>
+    <string name="smart_auto_stop_service_running">Auto-stop is running</string>
+</resources>

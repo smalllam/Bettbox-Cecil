@@ -1,0 +1,16 @@
+script_template: inno_setup.iss
+app_id: 728B3532-C74B-4870-9068-BE70FE1LITES
+app_name: Airport Client
+publisher: Your Company
+publisher_url: https://example.com
+display_name: Airport Client
+executable_name: AirportClient.exe
+output_base_file_name: AirportClient-1.0.0-windows-setup
+uri_scheme: airportclient
+helper_service_name: AirportClientHelperService
+setup_icon_file: ..\windows\runner\resources\app_icon.ico
+locales:
+  - lang: zh
+    file: ..\windows\packaging\exe\ChineseSimplified.isl
+  - lang: en
+privileges_required: admin

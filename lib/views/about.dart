@@ -1,0 +1,156 @@
+﻿import 'dart:async';
+
+import 'package:bett_box/white_label/white_label_config.dart';
+import 'package:bett_box/white_label/white_label_strings.dart';
+import 'package:bett_box/white_label/white_label_update.dart';
+import 'package:bett_box/common/common.dart';
+import 'package:bett_box/providers/config.dart';
+import 'package:bett_box/state.dart';
+import 'package:bett_box/widgets/list.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class AboutView extends StatelessWidget {
+  const AboutView({super.key});
+
+  List<Widget> _buildMoreSection(BuildContext context) {
+    final strings = whiteLabelStringsOf(context);
+    final canUpdate =
+        (system.isAndroid && whiteLabelAndroidUpdateUrl.isNotEmpty) ||
+        (system.isWindows && whiteLabelWindowsUpdateUrl.isNotEmpty);
+    return generateSection(
+      separated: false,
+      title: appLocalizations.more,
+      items: [
+        if (whiteLabelHomeUrl.isNotEmpty)
+          ListItem(
+            title: Text(strings.website),
+            subtitle: const Text(whiteLabelHomeUrl),
+            onTap: () {
+              globalState.openUrl(whiteLabelHomeUrl);
+            },
+            trailing: const Icon(Icons.launch),
+          ),
+        if (canUpdate)
+          ListItem(
+            title: const Text('Online update'),
+            subtitle: const Text('Download and install the latest version'),
+            onTap: () {
+              WhiteLabelUpdateService.checkAndPrompt();
+            },
+            trailing: const Icon(Icons.system_update_alt),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      ListTile(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Consumer(
+              builder: (_, ref, _) {
+                return _DeveloperModeDetector(
+                  child: Wrap(
+                    spacing: 16,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Image.asset(
+                          whiteLabelLogoAsset,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            globalState.packageInfo.version,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  onEnterDeveloperMode: () {
+                    ref
+                        .read(appSettingProvider.notifier)
+                        .updateState(
+                          (state) => state.copyWith(developerMode: true),
+                        );
+                    context.showNotifier(
+                      appLocalizations.developerModeEnableTip,
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            Text(
+              whiteLabelStringsOf(context).aboutDesc,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 12),
+      ..._buildMoreSection(context),
+    ];
+    return Padding(
+      padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+      child: generateListView(items),
+    );
+  }
+}
+
+class _DeveloperModeDetector extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onEnterDeveloperMode;
+
+  const _DeveloperModeDetector({
+    required this.child,
+    required this.onEnterDeveloperMode,
+  });
+
+  @override
+  State<_DeveloperModeDetector> createState() => _DeveloperModeDetectorState();
+}
+
+class _DeveloperModeDetectorState extends State<_DeveloperModeDetector> {
+  int _counter = 0;
+  Timer? _timer;
+
+  void _handleTap() {
+    _counter++;
+    if (_counter >= 5) {
+      widget.onEnterDeveloperMode();
+      _resetCounter();
+    } else {
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), _resetCounter);
+    }
+  }
+
+  void _resetCounter() {
+    _counter = 0;
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: _handleTap, child: widget.child);
+  }
+}
