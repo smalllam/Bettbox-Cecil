@@ -81,6 +81,7 @@ or private artwork belong here.
 | Support | Done | Generic support URL opens in app on mobile and in a desktop WebView window on Windows. |
 | Disclaimer | Done | Provider can pass `DISCLAIMER_TEXT`; acceptance remains stored in app settings. |
 | Windows packaging | Done | Full compatible Windows installer build was verified locally. |
+| Provider examples | Done | Generic dart-define, update manifest, and one-click import examples are included under `examples/white-label/`. |
 | Android packaging | Pending environment | Source is prepared, but final Android signing/build validation requires Android SDK/keystore setup in the build environment. |
 
 ## Next Recovery Steps
@@ -88,7 +89,9 @@ or private artwork belong here.
 1. Run Android build validation in a machine/CI environment with Android SDK and
    signing secrets configured.
 2. Add provider-specific private build scripts outside this public repository.
-3. Smoke test a real provider panel:
+3. Copy `examples/white-label/dart-defines.example.json` to a private location
+   and inject provider values with `--dart-define-from-file`.
+4. Smoke test a real provider panel:
    - login,
    - subscription import,
    - refresh subscription,
@@ -98,7 +101,7 @@ or private artwork belong here.
    - plan purchase,
    - payment return/polling,
    - logout.
-4. If a provider needs backup/restore hidden more aggressively, add a
+5. If a provider needs backup/restore hidden more aggressively, add a
    build-time UI policy flag rather than deleting upstream code.
 
 ## Verification Commands

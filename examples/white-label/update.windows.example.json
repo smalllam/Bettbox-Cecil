@@ -1,0 +1,12 @@
+{
+  "version": "1.0.1",
+  "releaseNotes": "Bug fixes and experience improvements.",
+  "packageUrl": "https://example.com/download/examplevpn-1.0.1-windows.zip",
+  "packageUrlFallback": "https://mirror.example.com/examplevpn-1.0.1-windows.zip",
+  "sha256": "",
+  "size": 73400320,
+  "setupUrl": "https://example.com/download/examplevpn-1.0.1-windows-setup.exe",
+  "setupUrlFallback": "https://mirror.example.com/examplevpn-1.0.1-windows-setup.exe",
+  "setupSha256": "",
+  "setupSize": 73400320
+}

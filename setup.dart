@@ -343,7 +343,17 @@ class BuildCommand extends Command {
     );
     argParser.addFlag(
       'compatible',
-      help: 'Build with GOAMD64=v2 for broader compatibility on amd64',
+      help: 'Build with GOAMD64=v1 for broader compatibility on amd64',
+    );
+    argParser.addMultiOption(
+      'dart-define',
+      valueHelp: 'KEY=VALUE',
+      help: 'Additional Flutter dart-define values. Can be repeated.',
+    );
+    argParser.addOption(
+      'dart-define-from-file',
+      valueHelp: 'path',
+      help: 'JSON object containing additional Flutter dart-define values.',
     );
   }
 
@@ -505,21 +515,66 @@ class BuildCommand extends Command {
   Future<void> _buildDistributor({
     required Target target,
     required String targets,
-    String args = '',
+    List<String> args = const [],
+    String flutterBuildArgs = 'verbose',
     required String env,
+    List<String> dartDefines = const [],
   }) async {
     final sentryDsn = Platform.environment['SENTRY_DSN'] ?? '';
-    final sentryArg = sentryDsn.isNotEmpty
-        ? ' --build-dart-define=SENTRY_DSN=$sentryDsn'
-        : '';
+    final buildDartDefines = [
+      ...dartDefines,
+      if (sentryDsn.isNotEmpty) 'SENTRY_DSN=$sentryDsn',
+      'APP_ENV=$env',
+    ];
 
     await Build.getDistributor();
-    await Build.exec(
-      name: name,
-      Build.getExecutable(
-        'flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args$sentryArg --build-dart-define=APP_ENV=$env',
-      ),
-    );
+    await Build.exec([
+      'flutter_distributor',
+      'package',
+      '--skip-clean',
+      '--platform',
+      target.name,
+      '--targets',
+      targets,
+      '--flutter-build-args=$flutterBuildArgs',
+      ...args,
+      for (final define in buildDartDefines) '--build-dart-define=$define',
+    ], name: name);
+  }
+
+  Future<List<String>> _resolveDartDefines() async {
+    final defines = <String>[];
+    final defineFile = (argResults?['dart-define-from-file'] ?? '')
+        .toString()
+        .trim();
+    if (defineFile.isNotEmpty) {
+      final file = File(defineFile);
+      if (!await file.exists()) {
+        throw 'dart-define-from-file not found: $defineFile';
+      }
+      final decoded = json.decode(await file.readAsString());
+      if (decoded is! Map) {
+        throw 'dart-define-from-file must be a JSON object.';
+      }
+      for (final entry in decoded.entries) {
+        final key = entry.key.toString().trim();
+        if (key.isEmpty || entry.value == null) continue;
+        defines.add('$key=${entry.value}');
+      }
+    }
+
+    final directDefines =
+        (argResults?['dart-define'] as List?)?.cast<String>() ??
+        const <String>[];
+    for (final define in directDefines) {
+      final value = define.trim();
+      if (value.isEmpty) continue;
+      if (!value.contains('=')) {
+        throw 'Invalid dart-define "$value". Expected KEY=VALUE.';
+      }
+      defines.add(value);
+    }
+    return defines;
   }
 
   Future<String?> get systemArch async {
@@ -548,6 +603,7 @@ class BuildCommand extends Command {
     }
 
     final bool compatible = argResults?['compatible'] ?? false;
+    final dartDefines = await _resolveDartDefines();
 
     final corePaths = await Build.buildCore(
       target: target,
@@ -567,17 +623,18 @@ class BuildCommand extends Command {
         final token = target != Target.android
             ? await Build.calcSha256(corePaths.first)
             : null;
-        Build.buildHelper(target, token!);
+        await Build.buildHelper(target, token!);
         if (compatible) {
           await _setWindowsCompatibleBuild(true);
         } else {
           await _setWindowsCompatibleBuild(false);
         }
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'exe',
-          args: ' --description $desc --build-dart-define=CORE_SHA256=$token',
+          args: ['--description', desc],
           env: env,
+          dartDefines: [...dartDefines, 'CORE_SHA256=$token'],
         );
         return;
       case Target.linux:
@@ -594,11 +651,17 @@ class BuildCommand extends Command {
         } else {
           await _setLinuxCompatibleBuild(false);
         }
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: targets,
-          args: ' --description $desc --build-target-platform $defaultTarget',
+          args: [
+            '--description',
+            desc,
+            '--build-target-platform',
+            defaultTarget!,
+          ],
           env: env,
+          dartDefines: dartDefines,
         );
         return;
       case Target.android:
@@ -613,15 +676,22 @@ class BuildCommand extends Command {
             .map((e) => targetMap[e])
             .toList();
 
-        final buildArgs = archName == 'universal'
-            ? ' --build-target-platform ${defaultTargets.join(",")} --description universal'
-            : ',split-per-abi --build-target-platform ${defaultTargets.join(",")}';
+        final flutterBuildArgs = archName == 'universal'
+            ? 'verbose'
+            : 'verbose,split-per-abi';
+        final description = archName == 'universal' ? 'universal' : desc;
 
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'apk',
-          args: buildArgs,
+          args: [
+            '--build-target-platform',
+            defaultTargets.join(','),
+            if (description.isNotEmpty) ...['--description', description],
+          ],
+          flutterBuildArgs: flutterBuildArgs,
           env: env,
+          dartDefines: dartDefines,
         );
         return;
       case Target.macos:
@@ -632,11 +702,12 @@ class BuildCommand extends Command {
         } else {
           await _setMacOSCompatibleBuild(false);
         }
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: 'dmg',
-          args: ' --description $desc',
+          args: ['--description', desc],
           env: env,
+          dartDefines: dartDefines,
         );
         return;
     }

@@ -58,6 +58,13 @@ $V2BOARD_PANEL_URL/api/v1
 
 更多配置见 [WHITE_LABEL.md](WHITE_LABEL.md)。
 
+配套示例：
+
+- [一键导入网站接入](docs/one-click-import.md)
+- [在线更新 manifest](docs/online-update.md)
+- `examples/white-label/dart-defines.example.json`
+- `examples/white-label/one-click-login.html`
+
 ### 配置项说明
 
 | 配置项 | 必填 | 说明 |
@@ -171,6 +178,13 @@ flutter build apk --release --target-platform android-arm64 --split-per-abi \
   --dart-define=SUPPORT_WEB_URL="https://support.example.com"
 ```
 
+也可以把白牌参数放进私有 JSON 文件，然后使用：
+
+```bash
+flutter build apk --release --target-platform android-arm64 --split-per-abi \
+  --dart-define-from-file=private/provider.dart-defines.json
+```
+
 签名文件不要提交到仓库。`android/app/keystore.jks`、`*.keystore`、`*.p12`、`*.pfx` 已在 `.gitignore` 中忽略。
 
 ### Android 发布前检查
@@ -202,6 +216,13 @@ flutter build windows --release \
   --dart-define=APP_DISPLAY_NAME="Your App" \
   --dart-define=APP_URI_SCHEME="yourapp" \
   --dart-define=V2BOARD_PANEL_URL="https://panel.example.com"
+```
+
+使用仓库打包脚本生成安装器时，也可以传入同一份私有 JSON：
+
+```bash
+dart setup.dart windows --arch amd64 --compatible \
+  --dart-define-from-file=private/provider.dart-defines.json
 ```
 
 ### Windows 发布前检查

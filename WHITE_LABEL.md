@@ -4,6 +4,9 @@ This repository is a neutral white-label client template. It does not include
 provider domains, DNS TXT hosts, bootstrap proxy credentials, update manifests,
 support vendor IDs, signing keys, or private assets.
 
+Copy `examples/white-label/dart-defines.example.json` to a private file outside
+Git and replace the placeholder values before building.
+
 ## Required runtime configuration
 
 Pass these values with `--dart-define` when building Flutter:
@@ -93,6 +96,18 @@ yourapp://install-config?authData=<v2board-auth-data>
 The app stores the auth data locally, fetches the subscription from the
 configured V2Board panel, and does not display the subscription URL to users.
 
+Full website integration notes and a standalone HTML example are in
+[`docs/one-click-import.md`](docs/one-click-import.md).
+
+## Online update manifest
+
+When `WINDOWS_UPDATE_URL` or `ANDROID_UPDATE_URL` is configured, the app reads a
+provider-hosted JSON manifest. See [`docs/online-update.md`](docs/online-update.md)
+and these examples:
+
+- `examples/white-label/update.android.example.json`
+- `examples/white-label/update.windows.example.json`
+
 ## Build examples
 
 Android:
@@ -105,6 +120,13 @@ flutter build apk --release --target-platform android-arm64 --split-per-abi \
   --dart-define=SUPPORT_WEB_URL="https://support.example.com"
 ```
 
+Or with a private JSON define file:
+
+```bash
+flutter build apk --release --target-platform android-arm64 --split-per-abi \
+  --dart-define-from-file=private/provider.dart-defines.json
+```
+
 Windows:
 
 ```bash
@@ -112,4 +134,14 @@ flutter build windows --release \
   --dart-define=APP_DISPLAY_NAME="Your App" \
   --dart-define=APP_URI_SCHEME="yourapp" \
   --dart-define=V2BOARD_PANEL_URL="https://panel.example.com"
+```
+
+The repository setup script also accepts the same provider values:
+
+```bash
+dart setup.dart windows --arch amd64 --compatible \
+  --dart-define-from-file=private/provider.dart-defines.json
+
+dart setup.dart android --arch arm64 \
+  --dart-define-from-file=private/provider.dart-defines.json
 ```

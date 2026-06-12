@@ -156,8 +156,16 @@ class CommandPackage extends Command {
         // ignore: prefer_for_elements_to_map_fromiterable
         value = Map.fromIterable(
           value,
-          key: (e) => e.split('=')[0],
-          value: (e) => e.split('=')[1],
+          key: (e) {
+            final text = e.toString();
+            final index = text.indexOf('=');
+            return index == -1 ? text : text.substring(0, index);
+          },
+          value: (e) {
+            final text = e.toString();
+            final index = text.indexOf('=');
+            return index == -1 ? '' : text.substring(index + 1);
+          },
         );
       }
 

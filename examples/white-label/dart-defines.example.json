@@ -1,0 +1,20 @@
+{
+  "APP_DISPLAY_NAME": "Example VPN",
+  "APP_LOGO_ASSET": "assets/images/icon.png",
+  "APP_URI_SCHEME": "examplevpn",
+  "APP_HOME_URL": "https://example.com",
+  "V2BOARD_PANEL_URL": "https://panel.example.com",
+  "V2BOARD_API_BASE_URL": "https://panel.example.com/api/v1",
+  "WINDOWS_UPDATE_URL": "https://example.com/client/windows/update.json",
+  "ANDROID_UPDATE_URL": "https://example.com/client/android/update.json",
+  "SUPPORT_WEB_URL": "https://support.example.com",
+  "BOOTSTRAP_PROXY_URI": "",
+  "BOOTSTRAP_PROXY_NAME": "bootstrap",
+  "BACKEND_PROXY_PORT": "7891",
+  "DELAY_MULTIPLIER": "1.0",
+  "PROFILE_ID": "example-provider-profile",
+  "CONFIG_TXT_HOST": "",
+  "CONFIG_CIPHERTEXT": "",
+  "DISCLAIMER_TEXT": "Example VPN is provided only for subscribers of this service. Please comply with applicable laws and the provider terms of service.",
+  "APP_ENV": "stable"
+}

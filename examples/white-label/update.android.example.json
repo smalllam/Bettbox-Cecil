@@ -1,0 +1,8 @@
+{
+  "version": "1.0.1",
+  "releaseNotes": "Bug fixes and experience improvements.",
+  "packageUrl": "https://example.com/download/examplevpn-1.0.1-arm64.apk",
+  "packageUrlFallback": "https://mirror.example.com/examplevpn-1.0.1-arm64.apk",
+  "sha256": "",
+  "size": 52428800
+}
