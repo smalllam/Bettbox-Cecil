@@ -110,7 +110,7 @@ class _WhiteLabelAuthGateState extends ConsumerState<WhiteLabelAuthGate> {
       final current = _currentWhiteLabelProfile();
       final profile =
           (current ??
-                  const Profile(
+                  Profile(
                     id: whiteLabelProfileId,
                     label: whiteLabelDisplayName,
                     autoUpdateDuration: defaultUpdateDuration,

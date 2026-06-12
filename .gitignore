@@ -22,6 +22,10 @@ private/
 *.local.json
 *.private.json
 *.env
+/config/build.secrets.json
+/config/merchant.cipher.txt
+/config/merchant.plain.json
+/config/merchant.secret
 
 # IntelliJ related
 *.iml

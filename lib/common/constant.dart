@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:bett_box/white_label/white_label_config.dart';
@@ -9,29 +9,28 @@ import 'package:bett_box/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:silky_scroll/silky_scroll.dart';
 
-const appName = whiteLabelDisplayName;
+String get appName => whiteLabelDisplayName;
 const appHelperService = String.fromEnvironment(
   'WINDOWS_HELPER_SERVICE_NAME',
-  defaultValue: 'AirportClientHelperService',
+  defaultValue: 'CecilHelperService',
 );
 const appHelperExecutableName = 'BettboxHelperService';
 const coreName = 'clash.meta';
 const tunDeviceName = String.fromEnvironment(
   'APP_TUN_NAME',
-  defaultValue: whiteLabelDisplayName,
+  defaultValue: 'Cecil',
 );
 const windowsExecutableName = String.fromEnvironment(
   'WINDOWS_EXECUTABLE_NAME',
-  defaultValue: 'AirportClient.exe',
+  defaultValue: 'Cecil.exe',
 );
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
 const packageName = String.fromEnvironment(
   'APP_PACKAGE_NAME',
-  defaultValue: 'com.example.airportclient',
+  defaultValue: 'one.sxr.cecil',
 );
-final unixSocketPath =
-    '/tmp/AirportClientSocket_${Random().nextInt(10000)}.sock';
+final unixSocketPath = '/tmp/CecilSocket_${Random().nextInt(10000)}.sock';
 const helperPort = 45678;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -139,9 +138,9 @@ double getWidgetHeight(num lines) {
 
 const maxLength = 256;
 
-final mainIsolate = 'AirportClientMainIsolate';
+final mainIsolate = 'CecilMainIsolate';
 
-final serviceIsolate = 'AirportClientServiceIsolate';
+final serviceIsolate = 'CecilServiceIsolate';
 
 const defaultPrimaryColors = [
   0xFF191919,

@@ -184,7 +184,7 @@ void FlutterWindow::SaveIconPreference(bool use_light_icon) {
   HKEY hKey;
   LONG result = RegCreateKeyExW(
       HKEY_CURRENT_USER,
-      L"Software\\Bettbox",
+      L"Software\\Cecil",
       0,
       NULL,
       REG_OPTION_NON_VOLATILE,
@@ -205,7 +205,7 @@ bool FlutterWindow::LoadIconPreference() {
   HKEY hKey;
   LONG result = RegOpenKeyExW(
       HKEY_CURRENT_USER,
-      L"Software\\Bettbox",
+      L"Software\\Cecil",
       0,
       KEY_READ,
       &hKey

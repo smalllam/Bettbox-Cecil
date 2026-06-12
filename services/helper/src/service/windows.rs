@@ -15,7 +15,7 @@ use windows_service::{
     service_dispatcher, Result,
 };
 
-const SERVICE_NAME: &str = "AirportClientHelperService";
+const SERVICE_NAME: &str = "CecilHelperService";
 
 const SERVICE_TYPE: ServiceType = ServiceType::OWN_PROCESS;
 
@@ -33,7 +33,7 @@ pub fn service_main(_arguments: Vec<OsString>) {
     if let Ok(rt) = Runtime::new() {
         rt.block_on(async {
             if let Err(e) = run_windows_service().await {
-                let log_path = std::env::temp_dir().join("bettbox_helper_error.log");
+                let log_path = std::env::temp_dir().join("cecil_helper_error.log");
                 let ts = std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .map(|d| d.as_secs())

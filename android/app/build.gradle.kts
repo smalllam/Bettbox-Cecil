@@ -17,10 +17,10 @@ val mKeyPassword: String? = localProperties.getProperty("keyPassword")
 val isRelease = mStoreFile.exists() && mStorePassword != null && mKeyAlias != null && mKeyPassword != null
 val appId = (findProperty("APP_ID") as String?)
     ?: localProperties.getProperty("appId")
-    ?: "com.example.airportclient"
+    ?: "one.sxr.cecil"
 val appScheme = (findProperty("APP_SCHEME") as String?)
     ?: localProperties.getProperty("appScheme")
-    ?: "airportclient"
+    ?: "cecil"
 
 android {
     namespace = "com.appshub.bettbox"

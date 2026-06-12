@@ -93,7 +93,7 @@ class Build {
     BuildItem(target: Target.android, arch: Arch.amd64, archName: 'x86_64'),
   ];
 
-  static String get appName => 'Bettbox';
+  static String get appName => 'Cecil';
 
   static String get coreName => 'BettboxCore';
 
@@ -458,9 +458,10 @@ class BuildCommand extends Command {
 
     if (enable) {
       if (!hasDefinition) {
-        content = content.replaceFirst(
-          'project(Bettbox LANGUAGES CXX)',
-          'project(Bettbox LANGUAGES CXX)\n\nadd_definitions(-DFLUTTER_DISABLE_IMPELLER=1)',
+        content = content.replaceFirstMapped(
+          RegExp(r'project\([^\n]+ LANGUAGES CXX\)'),
+          (match) =>
+              '${match.group(0)}\n\nadd_definitions(-DFLUTTER_DISABLE_IMPELLER=1)',
         );
       }
     } else {
@@ -516,7 +517,7 @@ class BuildCommand extends Command {
     required Target target,
     required String targets,
     List<String> args = const [],
-    String flutterBuildArgs = 'verbose',
+    String flutterBuildArgs = '',
     required String env,
     List<String> dartDefines = const [],
   }) async {
@@ -536,7 +537,8 @@ class BuildCommand extends Command {
       target.name,
       '--targets',
       targets,
-      '--flutter-build-args=$flutterBuildArgs',
+      if (flutterBuildArgs.trim().isNotEmpty)
+        '--flutter-build-args=$flutterBuildArgs',
       ...args,
       for (final define in buildDartDefines) '--build-dart-define=$define',
     ], name: name);
@@ -676,23 +678,43 @@ class BuildCommand extends Command {
             .map((e) => targetMap[e])
             .toList();
 
-        final flutterBuildArgs = archName == 'universal'
-            ? 'verbose'
-            : 'verbose,split-per-abi';
-        final description = archName == 'universal' ? 'universal' : desc;
-
-        await _buildDistributor(
-          target: target,
-          targets: 'apk',
-          args: [
-            '--build-target-platform',
-            defaultTargets.join(','),
-            if (description.isNotEmpty) ...['--description', description],
-          ],
-          flutterBuildArgs: flutterBuildArgs,
-          env: env,
-          dartDefines: dartDefines,
+        await Build.exec([
+          'flutter',
+          'build',
+          'apk',
+          '--release',
+          '--target-platform',
+          defaultTargets.join(','),
+          if (archName != 'universal') '--split-per-abi',
+          for (final define in [...dartDefines, 'APP_ENV=$env'])
+            '--dart-define=$define',
+        ], name: name);
+        await Directory(Build.distPath).create(recursive: true);
+        final apkDir = Directory(
+          join(current, 'build', 'app', 'outputs', 'flutter-apk'),
         );
+        if (await apkDir.exists()) {
+          await for (final file in apkDir.list()) {
+            if (file is! File ||
+                !basename(file.path).endsWith('-release.apk')) {
+              continue;
+            }
+            final abi = basename(
+              file.path,
+            ).replaceFirst('app-', '').replaceFirst('-release.apk', '');
+            final targetName = switch (abi) {
+              'armeabi-v7a' => 'android-arm',
+              'arm64-v8a' => 'android-arm64',
+              'x86_64' => 'android-x64',
+              _ => 'android-$abi',
+            };
+            final targetFile = File(
+              join(Build.distPath, '${Build.appName}-$targetName-release.apk'),
+            );
+            await file.copy(targetFile.path);
+            print('copy ${targetFile.path}');
+          }
+        }
         return;
       case Target.macos:
         await _getMacosDependencies();

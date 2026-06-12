@@ -28,6 +28,7 @@ Future<void> main() async {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
 
   final version = await system.version;
+  await MerchantConfig.initialize();
   await clashCore.preload();
   await globalState.initApp(version);
 
@@ -49,7 +50,7 @@ Future<void> _runApp() async {
     }
   }
   await android?.init();
-  
+
   await window?.init();
   HttpOverrides.global = BettboxHttpOverrides();
   runApp(ProviderScope(child: const Application()));
@@ -103,7 +104,9 @@ Future<void> _service(List<String> flags) async {
     }
 
     if (bootStart && !globalState.config.appSetting.autoRun) {
-      commonPrint.log('Silent boot detected, but autoRun is disabled. Staying idle.');
+      commonPrint.log(
+        'Silent boot detected, but autoRun is disabled. Staying idle.',
+      );
       _handleMainIpc(clashLibHandler);
       return;
     }
@@ -141,14 +144,21 @@ Future<void> _service(List<String> flags) async {
           final profile = globalState.config.profiles
               .where((e) => e.id == profileId)
               .firstOrNull;
-          final profileName = profile?.label ?? 'Bettbox';
-          await vpn_service.service?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
+          final profileName = profile?.label ?? appName;
+          await vpn_service.service?.updateNotificationSpeed(
+            profileName,
+            '↑0B/s ↓0B/s',
+          );
         }
 
         if (globalState.config.appSetting.openLogs) {
-          await clashLibHandler.invokeAction('{"id": "quickStartLog", "method": "startLog"}');
+          await clashLibHandler.invokeAction(
+            '{"id": "quickStartLog", "method": "startLog"}',
+          );
         } else {
-          await clashLibHandler.invokeAction('{"id": "quickStopLog", "method": "stopLog"}');
+          await clashLibHandler.invokeAction(
+            '{"id": "quickStopLog", "method": "stopLog"}',
+          );
         }
 
         clashLibHandler.startListener();

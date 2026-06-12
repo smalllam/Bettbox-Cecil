@@ -17,6 +17,8 @@ export 'launch.dart';
 export 'link.dart';
 export 'lock.dart';
 export 'measure.dart';
+export 'merchant_config.dart';
+export 'merchant_crypto.dart';
 export 'mixin.dart';
 export 'navigation.dart';
 export 'navigator.dart';

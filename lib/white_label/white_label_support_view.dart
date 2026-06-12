@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bett_box/white_label/white_label_config.dart';
@@ -16,7 +17,7 @@ Future<void> openWhiteLabelSupport(
   BuildContext context, {
   bool showBubbleOnBack = true,
 }) async {
-  if (whiteLabelSupportUrl.trim().isEmpty) {
+  if (!_hasSupportTarget) {
     globalState.showNotifier('Support URL is not configured.');
     return;
   }
@@ -49,7 +50,7 @@ Future<void> openWhiteLabelSupport(
       await webview.setApplicationNameForUserAgent(
         ' $whiteLabelDisplayName/1.0.0',
       );
-      webview.launch(whiteLabelSupportUrl);
+      webview.launch(await _desktopSupportTarget());
       webview.onClose.whenComplete(() {
         if (identical(_whiteLabelSupportWebview, webview)) {
           _whiteLabelSupportWebview = null;
@@ -65,6 +66,74 @@ Future<void> openWhiteLabelSupport(
     MaterialPageRoute(builder: (_) => const WhiteLabelSupportView()),
   );
   whiteLabelSupportBubbleVisible.value = showBubbleOnBack && showBubble == true;
+}
+
+bool get _hasSupportTarget =>
+    whiteLabelSupportUrl.trim().isNotEmpty || _crispWebsiteId != null;
+
+String? get _crispWebsiteId {
+  final value = whiteLabelSupportUri.trim();
+  if (value.isEmpty) return null;
+  final uri = Uri.tryParse(value);
+  if (uri == null || uri.scheme.toLowerCase() != 'crisp') return null;
+  final id = uri.host.isNotEmpty ? uri.host : uri.path.replaceAll('/', '');
+  return id.trim().isEmpty ? null : id.trim();
+}
+
+String _crispHtml(String websiteId) {
+  final id = jsonEncode(websiteId);
+  return '''
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #f7fbfa;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    window.\$crisp = [];
+    window.CRISP_WEBSITE_ID = $id;
+    (function () {
+      var d = document;
+      var s = d.createElement("script");
+      s.src = "https://client.crisp.chat/l.js";
+      s.async = 1;
+      d.getElementsByTagName("head")[0].appendChild(s);
+    })();
+    window.\$crisp.push(["do", "chat:open"]);
+  </script>
+</body>
+</html>
+''';
+}
+
+Future<String> _desktopSupportTarget() async {
+  final webUrl = whiteLabelSupportUrl.trim();
+  if (webUrl.isNotEmpty) return webUrl;
+
+  final websiteId = _crispWebsiteId;
+  if (websiteId == null) {
+    throw StateError('Support URL is not configured.');
+  }
+
+  final dataDirectory = await appPath.dataDir.future;
+  final supportDirectory = Directory(
+    '${dataDirectory.path}${Platform.pathSeparator}support_webview',
+  );
+  await supportDirectory.create(recursive: true);
+  final htmlFile = File(
+    '${supportDirectory.path}${Platform.pathSeparator}crisp.html',
+  );
+  await htmlFile.writeAsString(_crispHtml(websiteId));
+  return htmlFile.uri.toString();
 }
 
 class WhiteLabelSupportView extends StatefulWidget {
@@ -101,8 +170,18 @@ class _WhiteLabelSupportViewState extends State<WhiteLabelSupportView> {
             });
           },
         ),
-      )
-      ..loadRequest(Uri.parse(whiteLabelSupportUrl));
+      );
+    final webUrl = whiteLabelSupportUrl.trim();
+    if (webUrl.isNotEmpty) {
+      _controller!.loadRequest(Uri.parse(webUrl));
+    } else {
+      final websiteId = _crispWebsiteId;
+      if (websiteId == null) {
+        _loading = false;
+      } else {
+        _controller!.loadHtmlString(_crispHtml(websiteId));
+      }
+    }
   }
 
   @override

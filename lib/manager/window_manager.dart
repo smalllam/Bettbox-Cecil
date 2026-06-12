@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -331,7 +331,7 @@ class _WindowHeaderState extends State<WindowHeader> {
             ),
           ),
           if (system.isMacOS)
-            const Text(appName)
+            Text(appName)
           else ...[
             Positioned(right: 0, child: _buildActions()),
           ],

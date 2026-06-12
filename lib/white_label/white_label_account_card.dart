@@ -181,7 +181,7 @@ class _WhiteLabelAccountSectionState
                   ListItem(
                     leading: const Icon(Icons.language_outlined),
                     title: Text(strings.website),
-                    subtitle: const Text(whiteLabelHomeUrl),
+                    subtitle: Text(whiteLabelHomeUrl),
                     onTap: () => globalState.openUrl(whiteLabelHomeUrl),
                   ),
                   const Divider(height: 0),

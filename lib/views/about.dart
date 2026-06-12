@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/white_label/white_label_strings.dart';
@@ -25,7 +25,7 @@ class AboutView extends StatelessWidget {
         if (whiteLabelHomeUrl.isNotEmpty)
           ListItem(
             title: Text(strings.website),
-            subtitle: const Text(whiteLabelHomeUrl),
+            subtitle: Text(whiteLabelHomeUrl),
             onTap: () {
               globalState.openUrl(whiteLabelHomeUrl);
             },

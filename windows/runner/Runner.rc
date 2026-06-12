@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Airport Client" "\0"
-            VALUE "FileDescription", "Airport Client" "\0"
+            VALUE "CompanyName", "Cecil" "\0"
+            VALUE "FileDescription", "Cecil" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "airportclient" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Airport Client. All rights reserved." "\0"
-            VALUE "OriginalFilename", "AirportClient.exe" "\0"
-            VALUE "ProductName", "Airport Client" "\0"
+            VALUE "InternalName", "cecil" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Cecil. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Cecil.exe" "\0"
+            VALUE "ProductName", "Cecil" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
