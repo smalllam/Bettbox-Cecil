@@ -14,7 +14,7 @@ const appHelperService = String.fromEnvironment(
   'WINDOWS_HELPER_SERVICE_NAME',
   defaultValue: 'CecilHelperService',
 );
-const appHelperExecutableName = 'BettboxHelperService';
+const appHelperExecutableName = 'CecilHelperService';
 const coreName = 'clash.meta';
 const tunDeviceName = String.fromEnvironment(
   'APP_TUN_NAME',
@@ -64,7 +64,7 @@ const configKey = 'config';
 const customSidebarIconKey = 'custom_sidebar_icon';
 const customDashboardTitleKey = 'custom_dashboard_title';
 const double dialogCommonWidth = 300;
-const repository = 'appshubcc/Bettbox';
+const repository = 'smalllam/Bettbox-Cecil';
 const defaultExternalController = '127.0.0.1:9090';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;

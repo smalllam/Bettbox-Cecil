@@ -19,7 +19,7 @@ PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 CloseApplications=yes
-CloseApplicationsFilter={{EXECUTABLE_NAME}},BettboxCore.exe,BettboxHelperService.exe
+CloseApplicationsFilter={{EXECUTABLE_NAME}},CecilCore.exe,CecilHelperService.exe
 SetupLogging=yes
 
 [Registry]
@@ -46,22 +46,22 @@ var
   i: Integer;
   WaitCount: Integer;
 begin
-  if IsProcessRunning('BettboxHelperService.exe') then
+  if IsProcessRunning('CecilHelperService.exe') then
   begin
     Exec('sc', 'stop {{HELPER_SERVICE_NAME}}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
     WaitCount := 0;
-    while (WaitCount < 5) and IsProcessRunning('BettboxHelperService.exe') do
+    while (WaitCount < 5) and IsProcessRunning('CecilHelperService.exe') do
     begin
       Sleep(400);
       WaitCount := WaitCount + 1;
     end;
 
-    if IsProcessRunning('BettboxHelperService.exe') then
-      Exec('taskkill', '/f /im BettboxHelperService.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    if IsProcessRunning('CecilHelperService.exe') then
+      Exec('taskkill', '/f /im CecilHelperService.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 
-  Processes := ['{{EXECUTABLE_NAME}}', 'BettboxCore.exe'];
+  Processes := ['{{EXECUTABLE_NAME}}', 'CecilCore.exe'];
 
   for i := 0 to GetArrayLength(Processes)-1 do
   begin
@@ -78,10 +78,10 @@ var
 begin
   PowerShellScript := 
     '$ErrorActionPreference = ''SilentlyContinue'';' + #13#10 +
-    'Write-Host "Cleaning old Wintun/Bettbox/LiClash network adapters...";' + #13#10 +
+    'Write-Host "Cleaning old Cecil network adapters...";' + #13#10 +
     '$adapters = Get-NetAdapter | Where-Object {' + #13#10 +
-    '$_.InterfaceDescription -like "*Bettbox*" -or' + #13#10 +
-    '  $_.Name -like "*Bettbox*"' + #13#10 +
+'$_.InterfaceDescription -like "*Cecil*" -or' + #13#10 +
+    '  $_.Name -like "*Cecil*"' + #13#10 +
     '};' + #13#10 +
     'if ($adapters) {' + #13#10 +
     '  foreach ($adapter in $adapters) {' + #13#10 +
@@ -117,7 +117,7 @@ var
   ServiceName: String;
 begin
   ServiceName := '{{HELPER_SERVICE_NAME}}';
-  HelperPath := ExpandConstant('{app}\BettboxHelperService.exe');
+  HelperPath := ExpandConstant('{app}\CecilHelperService.exe');
   
   Exec('sc', 'stop ' + ServiceName, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Exec('sc', 'delete ' + ServiceName, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
@@ -144,7 +144,7 @@ var
   TaskNames: TArrayOfString;
   i: Integer;
 begin
-  TaskNames := ['Bettbox'];
+  TaskNames := ['Cecil'];
   
   for i := 0 to GetArrayLength(TaskNames)-1 do
   begin
@@ -158,8 +158,8 @@ var
   i: Integer;
 begin
   SetArrayLength(RegistryKeys, 2);
-  RegistryKeys[0] := 'Software\com.appshub.bettbox';
-  RegistryKeys[1] := 'Software\com.appshub\Bettbox';
+  RegistryKeys[0] := 'Software\one.sxr.cecil';
+  RegistryKeys[1] := 'Software\SXR\Cecil';
   
   for i := 0 to GetArrayLength(RegistryKeys)-1 do
   begin
@@ -176,8 +176,8 @@ begin
   AppDataPath := ExpandConstant('{userappdata}');
   
   SetArrayLength(UserDataPaths, 2);
-  UserDataPaths[0] := AppDataPath + '\com.appshub.bettbox';
-  UserDataPaths[1] := AppDataPath + '\com.appshub\Bettbox';
+  UserDataPaths[0] := AppDataPath + '\one.sxr.cecil';
+  UserDataPaths[1] := AppDataPath + '\SXR\Cecil';
   
   for i := 0 to GetArrayLength(UserDataPaths)-1 do
   begin
@@ -187,9 +187,9 @@ begin
     end;
   end;
   
-  if DirExists(AppDataPath + '\com.appshub') then
+  if DirExists(AppDataPath + '\SXR') then
   begin
-    RemoveDir(AppDataPath + '\com.appshub');
+    RemoveDir(AppDataPath + '\SXR');
   end;
 end;
 

@@ -699,7 +699,7 @@ class AppController {
 
     try {
       await system.setProcessPriority(windowsExecutableName, enable);
-      await request.setProcessPriorityByHelper('BettboxCore.exe', enable);
+      await request.setProcessPriorityByHelper('CecilCore.exe', enable);
     } catch (e) {
       commonPrint.log('Set process priority error: $e');
       rethrow;

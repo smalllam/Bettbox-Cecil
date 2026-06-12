@@ -40,7 +40,7 @@ class AppPath {
   }
 
   String get corePath {
-    return join(executableDirPath, 'BettboxCore$executableExtension');
+    return join(executableDirPath, 'CecilCore$executableExtension');
   }
 
   String get helperPath {
@@ -59,7 +59,7 @@ class AppPath {
 
   Future<String> get lockFilePath async {
     final directory = await dataDir.future;
-    return join(directory.path, 'Bettbox.lock');
+    return join(directory.path, 'Cecil.lock');
   }
 
   Future<String> get sharedPreferencesPath async {

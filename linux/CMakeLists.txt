@@ -6,10 +6,10 @@ set(SENTRY_BACKEND none CACHE STRING "Sentry backend" FORCE)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "Bettbox")
+set(BINARY_NAME "Cecil")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.appshub.bettbox")
+set(APPLICATION_ID "one.sxr.cecil")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -125,7 +125,11 @@ install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
 
 # libclash.so
 set(CLASH_DIR "../libclash/linux")
-install(PROGRAMS "${CLASH_DIR}/BettboxCore" DESTINATION "${BUILD_BUNDLE_DIR}"
+install(CODE "
+  file(REMOVE \"${BUILD_BUNDLE_DIR}/BettboxCore\")
+  " COMPONENT Runtime)
+
+install(PROGRAMS "${CLASH_DIR}/CecilCore" DESTINATION "${BUILD_BUNDLE_DIR}"
   COMPONENT Runtime)
 
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})

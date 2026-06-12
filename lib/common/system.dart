@@ -128,8 +128,8 @@ class System {
 
   Future<void> setProcessPriority(String processName, bool enable) async {
     if (!isWindows) return;
-    
-    if (processName == 'Bettbox.exe') {
+
+    if (processName == windowsExecutableName) {
       try {
         windows?.setCurrentProcessPriority(enable);
         return;
@@ -137,7 +137,7 @@ class System {
         commonPrint.log('Failed to set current process priority: $e');
       }
     }
-    
+
     final result = await Process.run('wmic', [
       'process',
       'where',
@@ -146,7 +146,7 @@ class System {
       'setpriority',
       enable ? 'above normal' : 'normal',
     ]);
-    
+
     if (result.exitCode != 0) {
       throw Exception('Failed to set process priority: ${result.stderr}');
     }
@@ -170,27 +170,28 @@ class Windows {
 
   void setCurrentProcessPriority(bool enable) {
     final kernel32 = DynamicLibrary.open('kernel32.dll');
-    
-    final getCurrentProcess = kernel32.lookupFunction<
-      IntPtr Function(),
-      int Function()
-    >('GetCurrentProcess');
-    
-    final setPriorityClass = kernel32.lookupFunction<
-      Int32 Function(IntPtr hProcess, Int32 dwPriorityClass),
-      int Function(int hProcess, int dwPriorityClass)
-    >('SetPriorityClass');
-    
+
+    final getCurrentProcess = kernel32
+        .lookupFunction<IntPtr Function(), int Function()>('GetCurrentProcess');
+
+    final setPriorityClass = kernel32
+        .lookupFunction<
+          Int32 Function(IntPtr hProcess, Int32 dwPriorityClass),
+          int Function(int hProcess, int dwPriorityClass)
+        >('SetPriorityClass');
+
     final priorityClass = enable ? 0x00008000 : 0x00000020;
-    
+
     final hProcess = getCurrentProcess();
     final result = setPriorityClass(hProcess, priorityClass);
-    
+
     if (result == 0) {
       throw Exception('SetPriorityClass failed');
     }
-    
-    commonPrint.log('Set current process priority to ${enable ? "above normal" : "normal"}');
+
+    commonPrint.log(
+      'Set current process priority to ${enable ? "above normal" : "normal"}',
+    );
   }
 
   bool runas(String command, String arguments, {bool showWindow = false}) {
@@ -357,7 +358,8 @@ class Windows {
     final executablePath = Platform.resolvedExecutable;
     final workingDirectory = dirname(executablePath);
 
-    final taskXml = '''
+    final taskXml =
+        '''
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.3" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>

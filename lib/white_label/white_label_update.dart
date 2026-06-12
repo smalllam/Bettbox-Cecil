@@ -138,16 +138,13 @@ class WhiteLabelUpdateService {
   static Future<void> checkAndPrompt({bool silent = false}) async {
     if (!system.isAndroid && !system.isWindows) {
       if (!silent) {
-        await _message(
-          'Online update',
-          'Online update is not supported on this platform.',
-        );
+        await _message('版本更新', '当前平台不支持在线更新。');
       }
       return;
     }
     if (!_hasUpdateEndpoint) {
       if (!silent) {
-        await _message('Online update', 'Update endpoint is not configured.');
+        await _message('版本更新', '更新接口未配置。');
       }
       return;
     }
@@ -156,10 +153,7 @@ class WhiteLabelUpdateService {
       final updateInfo = await fetchUpdateInfo();
       if (!updateInfo.isNewer) {
         if (!silent) {
-          await _message(
-            'Online update',
-            'You are already using the latest version.',
-          );
+          await _message('版本更新', '当前已是最新版本。');
         }
         return;
       }
@@ -170,7 +164,7 @@ class WhiteLabelUpdateService {
     } catch (e) {
       commonPrint.log('Update check failed: $e');
       if (!silent) {
-        await _message('Online update failed', e.toString());
+        await _message('版本更新失败', e.toString());
       }
     }
   }
@@ -180,7 +174,7 @@ class WhiteLabelUpdateService {
         ? whiteLabelWindowsUpdateUrl
         : whiteLabelAndroidUpdateUrl;
     if (endpoint.trim().isEmpty) {
-      throw 'Update endpoint is not configured.';
+      throw '更新接口未配置。';
     }
     final manifestUri = Uri.parse(endpoint);
     final response = await _dio.getUri<String>(
@@ -189,11 +183,11 @@ class WhiteLabelUpdateService {
     );
     final data = response.data;
     if (data == null || data.trim().isEmpty) {
-      throw 'Update endpoint returned an empty response.';
+      throw '更新接口返回为空。';
     }
     final decoded = json.decode(data);
     if (decoded is! Map) {
-      throw 'Update endpoint returned an invalid format.';
+      throw '更新接口格式无效。';
     }
     return WhiteLabelUpdateInfo.fromJson(
       Map<String, dynamic>.from(decoded),
@@ -211,10 +205,10 @@ class WhiteLabelUpdateService {
   static Future<void> downloadAndOpen(WhiteLabelUpdateInfo updateInfo) async {
     final asset = updateInfo.preferredAsset;
     if (asset.url.trim().isEmpty) {
-      throw 'Update endpoint did not provide a download URL.';
+      throw '更新接口未提供下载地址。';
     }
 
-    globalState.showNotifier('Downloading update...');
+    globalState.showNotifier('正在下载更新...');
     final file = await _downloadAsset(updateInfo, asset);
     await _verifySha256(file, asset.sha256);
     await _openDownloadedFile(file);
@@ -249,7 +243,7 @@ class WhiteLabelUpdateService {
           },
         );
         if (await targetFile.length() == 0) {
-          throw 'Downloaded file is empty.';
+          throw '下载文件为空。';
         }
         return targetFile;
       } catch (e) {
@@ -259,7 +253,7 @@ class WhiteLabelUpdateService {
         }
       }
     }
-    throw lastError ?? 'Download failed.';
+    throw lastError ?? '下载失败。';
   }
 
   static Future<void> _verifySha256(File file, String? expected) async {
@@ -270,7 +264,7 @@ class WhiteLabelUpdateService {
       try {
         await file.delete();
       } catch (_) {}
-      throw 'Update package verification failed. Please try again later.';
+      throw '更新包校验失败，请稍后重试。';
     }
   }
 
@@ -278,7 +272,7 @@ class WhiteLabelUpdateService {
     if (system.isAndroid) {
       final opened = await app.openFile(file.path);
       if (!opened) {
-        throw 'Could not open the installer. Please install the file manually.';
+        throw '无法打开安装包，请手动安装下载文件。';
       }
       return;
     }
@@ -291,14 +285,10 @@ class WhiteLabelUpdateService {
           const [],
           mode: ProcessStartMode.detached,
         );
-        globalState.showNotifier(
-          'Installer started. Follow the prompts to finish updating.',
-        );
+        globalState.showNotifier('安装程序已启动，请按提示完成更新。');
       } else {
         await Process.start('explorer.exe', ['/select,', file.path]);
-        globalState.showNotifier(
-          'Update package downloaded. Install it manually.',
-        );
+        globalState.showNotifier('更新包已下载，请手动安装。');
       }
       return;
     }
@@ -310,16 +300,16 @@ class WhiteLabelUpdateService {
     final asset = updateInfo.preferredAsset;
     final size = _formatSize(asset.size);
     final notes = updateInfo.releaseNotes.trim().isEmpty
-        ? 'Bug fixes and experience improvements'
+        ? '修复问题并优化使用体验'
         : updateInfo.releaseNotes.trim();
     return globalState.showMessage(
-      title: 'New version available',
-      confirmText: 'Update now',
+      title: '发现新版本',
+      confirmText: '立即更新',
       message: TextSpan(
         text:
-            'Current version: ${globalState.packageInfo.version}\n'
-            'Latest version: ${updateInfo.version}\n'
-            '${size.isEmpty ? '' : 'File size: $size\n'}'
+            '当前版本：${globalState.packageInfo.version}\n'
+            '最新版本：${updateInfo.version}\n'
+            '${size.isEmpty ? '' : '文件大小：$size\n'}'
             '\n$notes',
       ),
     );

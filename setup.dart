@@ -95,7 +95,7 @@ class Build {
 
   static String get appName => 'Cecil';
 
-  static String get coreName => 'BettboxCore';
+  static String get coreName => 'CecilCore';
 
   static String get libName => 'libclash';
 
@@ -265,7 +265,7 @@ class Build {
     final targetPath = join(
       outDir,
       target.name,
-      'BettboxHelperService${target.executableExtensionName}',
+      'CecilHelperService${target.executableExtensionName}',
     );
     await File(outPath).copy(targetPath);
   }
@@ -494,8 +494,8 @@ class BuildCommand extends Command {
     if (enable) {
       if (!hasDefinition) {
         content = content.replaceFirst(
-          'set(APPLICATION_ID "com.appshub.bettbox")',
-          'set(APPLICATION_ID "com.appshub.bettbox")\n\nadd_definitions(-DFLUTTER_DISABLE_IMPELLER=1)',
+          'set(APPLICATION_ID "one.sxr.cecil")',
+          'set(APPLICATION_ID "one.sxr.cecil")\n\nadd_definitions(-DFLUTTER_DISABLE_IMPELLER=1)',
         );
       }
     } else {
