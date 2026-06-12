@@ -147,7 +147,7 @@ Future<void> _service(List<String> flags) async {
           final profileName = profile?.label ?? appName;
           await vpn_service.service?.updateNotificationSpeed(
             profileName,
-            '↑0B/s ↓0B/s',
+            '↑ 0B/s ↓ 0B/s',
           );
         }
 
