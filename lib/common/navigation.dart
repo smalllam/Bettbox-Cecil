@@ -32,12 +32,6 @@ class Navigation {
             : [],
       ),
       NavigationItem(
-        icon: Icon(Icons.folder),
-        label: PageLabel.profiles,
-        builder: (_) =>
-            const ProfilesView(key: GlobalObjectKey(PageLabel.profiles)),
-      ),
-      NavigationItem(
         icon: Icon(Icons.view_timeline),
         label: PageLabel.requests,
         builder: (_) =>

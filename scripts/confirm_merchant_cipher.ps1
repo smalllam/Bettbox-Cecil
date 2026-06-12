@@ -28,10 +28,18 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $cipher = Get-Content "config/merchant.cipher.txt" -Raw
 $bytes = [System.Text.Encoding]::UTF8.GetByteCount($cipher.Trim())
+$dnsHost = $env:MERCHANT_CONFIG_DNS_HOST
+if (-not $dnsHost -and (Test-Path "config/build.secrets.json")) {
+  $buildSecrets = Get-Content "config/build.secrets.json" -Raw | ConvertFrom-Json
+  $dnsHost = $buildSecrets.MERCHANT_CONFIG_DNS_HOST
+}
+if (-not $dnsHost) {
+  $dnsHost = "<MERCHANT_CONFIG_DNS_HOST>"
+}
 
 Write-Host ""
 Write-Host "Cipher length: $bytes / 512 bytes" -ForegroundColor Yellow
-Write-Host "DNS host: nt-2.sxr.pics (TXT)" -ForegroundColor Yellow
+Write-Host "DNS host: $dnsHost (TXT)" -ForegroundColor Yellow
 Write-Host ""
 
 $answer = Read-Host "Confirm DNS TXT is updated and continue build? (y/N)"

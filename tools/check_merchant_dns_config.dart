@@ -11,9 +11,13 @@ import 'package:dio/dio.dart';
 Future<void> main() async {
   const host = String.fromEnvironment(
     'MERCHANT_CONFIG_DNS_HOST',
-    defaultValue: 'nt-2.sxr.pics',
+    defaultValue: '',
   );
   const secret = String.fromEnvironment('MERCHANT_CONFIG_KEY');
+  if (host.trim().isEmpty) {
+    stderr.writeln('Missing MERCHANT_CONFIG_DNS_HOST.');
+    exit(2);
+  }
   if (secret.trim().isEmpty) {
     stderr.writeln('Missing MERCHANT_CONFIG_KEY.');
     exit(2);

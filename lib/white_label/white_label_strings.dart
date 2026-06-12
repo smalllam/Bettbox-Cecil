@@ -120,6 +120,16 @@ class WhiteLabelStrings {
       _t('刷新订阅', '重新整理訂閱', 'Refresh subscription');
   String get subscriptionUpdated =>
       _t('订阅已更新', '訂閱已更新', 'Subscription updated');
+  String get oneClickImportReceived => _t(
+    '已接收登录数据，正在同步订阅...',
+    '已接收登入資料，正在同步訂閱...',
+    'Import received. Syncing subscription...',
+  );
+  String get unsupportedImportLink => _t(
+    '请从官网使用一键导入登录。',
+    '請從官網使用一鍵匯入登入。',
+    'Please use one-click login import from the website.',
+  );
   String get allPlans => _t('全部套餐', '全部方案', 'All plans');
   String get byPeriod => _t('按周期', '按週期', 'By period');
   String get byTraffic => _t('按流量', '按流量', 'By traffic');

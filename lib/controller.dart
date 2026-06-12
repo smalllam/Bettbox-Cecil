@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:archive/archive_io.dart';
 import 'package:bett_box/white_label/white_label_api.dart';
 import 'package:bett_box/white_label/white_label_config.dart';
+import 'package:bett_box/white_label/white_label_strings.dart';
 import 'package:bett_box/white_label/white_label_update.dart';
 import 'package:bett_box/clash/clash.dart';
 import 'package:bett_box/enum/enum.dart';
@@ -1046,44 +1047,21 @@ class AppController {
 
   void initLink() {
     linkManager.initAppLinksListen((link) async {
+      final strings = whiteLabelStringsOf(context);
       final authData = link.authData?.trim() ?? '';
       if (authData.isNotEmpty) {
         await WhiteLabelApi.saveSession(
           WhiteLabelSession(token: '', authData: authData, email: ''),
         );
         WhiteLabelApi.notifyAuthChanged();
-        globalState.showNotifier('Import received. Syncing subscription...');
+        globalState.showNotifier(strings.oneClickImportReceived);
         return;
       }
 
       final url = link.url?.trim() ?? '';
-      if (url.isEmpty) {
-        return;
+      if (url.isNotEmpty) {
+        globalState.showNotifier(strings.unsupportedImportLink);
       }
-      final res = await globalState.showMessage(
-        title: '${appLocalizations.add}${appLocalizations.profile}',
-        message: TextSpan(
-          children: [
-            TextSpan(text: appLocalizations.doYouWantToPass),
-            TextSpan(
-              text: ' $url ',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                decoration: TextDecoration.underline,
-                decorationColor: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            TextSpan(
-              text: '${appLocalizations.create}${appLocalizations.profile}',
-            ),
-          ],
-        ),
-      );
-
-      if (res != true) {
-        return;
-      }
-      addProfileFormURL(url);
     });
   }
 
@@ -1101,7 +1079,7 @@ class AppController {
               child: Text(appLocalizations.exit),
             ),
             TextButton(
-              onPressed: () async {
+              onPressed: () {
                 _ref
                     .read(appSettingProvider.notifier)
                     .updateState(

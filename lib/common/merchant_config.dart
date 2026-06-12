@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 class MerchantConfig {
   static const dnsHost = String.fromEnvironment(
     'MERCHANT_CONFIG_DNS_HOST',
-    defaultValue: 'nt-2.sxr.pics',
+    defaultValue: '',
   );
   static const maxCipherBytes = 512;
   static const configKeyEnv = 'MERCHANT_CONFIG_KEY';
@@ -59,6 +59,9 @@ class MerchantConfig {
     final secret = const String.fromEnvironment(configKeyEnv);
     if (secret.trim().isEmpty) {
       throw StateError('Missing build define: $configKeyEnv');
+    }
+    if (dnsHost.trim().isEmpty) {
+      throw StateError('Missing build define: MERCHANT_CONFIG_DNS_HOST');
     }
     final cipher = await _fetchDnsTxt();
     final plain = MerchantCrypto.decryptFromBase64Url(cipher, secret);

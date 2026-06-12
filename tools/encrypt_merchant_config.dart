@@ -8,7 +8,7 @@ import 'package:bett_box/models/merchant_config_data.dart';
 
 const _dnsHost = String.fromEnvironment(
   'MERCHANT_CONFIG_DNS_HOST',
-  defaultValue: 'nt-2.sxr.pics',
+  defaultValue: 'merchant-config.example.com',
 );
 const _maxCipherBytes = 512;
 
