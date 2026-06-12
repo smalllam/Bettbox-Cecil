@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:bett_box/white_label/white_label_api.dart';
@@ -64,10 +64,6 @@ class _WhiteLabelAuthGateState extends ConsumerState<WhiteLabelAuthGate> {
       await _syncSubscription(session);
       _finishChecking(authenticated: true);
     } catch (e) {
-      if (_currentWhiteLabelProfile() != null) {
-        _finishChecking(authenticated: true);
-        return;
-      }
       await _clearLocalAccess();
       _finishChecking(authenticated: false, message: e.toString());
     }
@@ -384,8 +380,16 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
 
   @override
   Widget build(BuildContext context) {
-    String localized(String simplified, String traditional, String english) =>
-        english;
+    String localized(String simplified, String traditional, String english) {
+      final locale = Localizations.localeOf(context);
+      if (locale.languageCode != 'zh') return english;
+      final isTraditional =
+          locale.scriptCode == 'Hant' ||
+          locale.countryCode == 'TW' ||
+          locale.countryCode == 'HK' ||
+          locale.countryCode == 'MO';
+      return isTraditional ? traditional : simplified;
+    }
 
     final form = Form(
       key: _formKey,
@@ -410,17 +414,13 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
-                labelText: localized('Email', 'Email', 'Email'),
+                labelText: localized('邮箱', '電子郵箱', 'Email'),
                 prefixIcon: const Icon(Icons.alternate_email),
               ),
               validator: (value) {
                 final valueText = value?.trim() ?? '';
                 if (valueText.isEmpty || !valueText.contains('@')) {
-                  return localized(
-                    'Enter your email.',
-                    'Enter your email.',
-                    'Enter your email.',
-                  );
+                  return localized('请输入邮箱。', '請輸入電子郵箱。', 'Enter your email.');
                 }
                 return null;
               },
@@ -434,20 +434,12 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
               onFieldSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
-                labelText: localized('Password', 'Password', 'Password'),
+                labelText: localized('密码', '密碼', 'Password'),
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   tooltip: _obscurePassword
-                      ? localized(
-                          'Show password',
-                          'Show password',
-                          'Show password',
-                        )
-                      : localized(
-                          'Hide password',
-                          'Hide password',
-                          'Hide password',
-                        ),
+                      ? localized('显示密码', '顯示密碼', 'Show password')
+                      : localized('隐藏密码', '隱藏密碼', 'Hide password'),
                   icon: Icon(
                     _obscurePassword
                         ? Icons.visibility_outlined
@@ -462,11 +454,7 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
               ),
               validator: (value) {
                 if ((value ?? '').isEmpty) {
-                  return localized(
-                    'Enter your password.',
-                    'Enter your password.',
-                    'Enter your password.',
-                  );
+                  return localized('请输入密码。', '請輸入密碼。', 'Enter your password.');
                 }
                 return null;
               },
@@ -491,21 +479,19 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.login),
-              label: Text(localized('Sign in', 'Sign in', 'Sign in')),
+              label: Text(localized('登录', '登入', 'Sign in')),
             ),
             if (whiteLabelHomeUrl.isNotEmpty)
               TextButton.icon(
                 onPressed: _loading ? null : _openHome,
                 icon: const Icon(Icons.open_in_new),
-                label: Text(
-                  localized('Open website', 'Open website', 'Open website'),
-                ),
+                label: Text(localized('打开官网', '開啟官網', 'Open website')),
               ),
             if (whiteLabelSupportUrl.isNotEmpty)
               TextButton.icon(
                 onPressed: _loading ? null : _openSupport,
                 icon: const Icon(Icons.support_agent),
-                label: Text(localized('Support', 'Support', 'Support')),
+                label: Text(localized('客服', '客服', 'Support')),
               ),
           ],
         ),

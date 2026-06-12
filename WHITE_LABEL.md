@@ -28,6 +28,8 @@ Pass these values with `--dart-define` when building Flutter:
 --dart-define=BOOTSTRAP_PROXY_NAME="bootstrap"
 --dart-define=BACKEND_PROXY_PORT=7891
 --dart-define=DELAY_MULTIPLIER=1.0
+--dart-define=DISCLAIMER_TEXT="Your provider disclaimer"
+--dart-define=APP_ENV=pre
 --dart-define=CONFIG_TXT_HOST="config.example.com"
 --dart-define=CONFIG_CIPHERTEXT="..."
 ```
@@ -40,6 +42,13 @@ support entry.
 If `BOOTSTRAP_PROXY_URI` is empty, the client uses direct API access. If it is
 set, the client can start a temporary local proxy for panel and subscription
 requests.
+
+`DISCLAIMER_TEXT` is optional. When it is empty, the app uses the default
+localized disclaimer text. When it is provided, that provider-specific text is
+shown in the disclaimer dialog and the user's acceptance is stored locally.
+
+`APP_ENV=pre` is optional and only enables the pre-release badge. If omitted,
+the app behaves as a release build.
 
 ## Android configuration
 

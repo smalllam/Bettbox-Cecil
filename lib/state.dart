@@ -81,7 +81,7 @@ class GlobalState {
   Future<void> initApp(int version) async {
     isExiting = false;
     coreSHA256 = const String.fromEnvironment('CORE_SHA256');
-    isPre = const String.fromEnvironment('APP_ENV') != 'stable';
+    isPre = const String.fromEnvironment('APP_ENV') == 'pre';
     appState = AppState(
       brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
       version: version,
@@ -189,7 +189,9 @@ class GlobalState {
     }
     render?.pause();
 
-    final networkSpeedNotification = appController.ref.read(vpnSettingProvider).networkSpeedNotification;
+    final networkSpeedNotification = appController.ref
+        .read(vpnSettingProvider)
+        .networkSpeedNotification;
     if (!networkSpeedNotification) {
       stopUpdateTasks();
     }
@@ -517,11 +519,13 @@ class GlobalState {
     rawConfig['tun']['enable'] = realPatchConfig.tun.enable;
     rawConfig['tun']['device'] = realPatchConfig.tun.device;
     final dnsHijack = realPatchConfig.tun.dnsHijack;
-    rawConfig['tun']['dns-hijack'] =
-        dnsHijack.isEmpty ? const ['any:53'] : dnsHijack;
+    rawConfig['tun']['dns-hijack'] = dnsHijack.isEmpty
+        ? const ['any:53']
+        : dnsHijack;
     rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
     rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
-    rawConfig['tun']['route-exclude-address'] = realPatchConfig.tun.routeExcludeAddress;
+    rawConfig['tun']['route-exclude-address'] =
+        realPatchConfig.tun.routeExcludeAddress;
     rawConfig['tun']['auto-route'] = true;
     rawConfig['tun']['auto-detect-interface'] = true;
     rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
@@ -758,12 +762,13 @@ class GlobalState {
       }
     }
 
-
-
     if (config.vpnProps.disableQuic) {
-      final isRussian = config.appSetting.locale?.toLowerCase().startsWith('ru') ?? false;
+      final isRussian =
+          config.appSetting.locale?.toLowerCase().startsWith('ru') ?? false;
       final quicRules = config.vpnProps.excludeChina && !isRussian
-          ? ['AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,geolocation-cn),(GEOIP,CN,no-resolve)))))),REJECT']
+          ? [
+              'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,geolocation-cn),(GEOIP,CN,no-resolve)))))),REJECT',
+            ]
           : ['AND,((NETWORK,UDP),(DST-PORT,443)),REJECT'];
       rules = [...quicRules, ...rules];
     }
@@ -1008,7 +1013,10 @@ class DetectionState {
     final isStateChanged = _preIsStart != isStart;
     _preIsStart = isStart;
 
-    if (!isStart && state.value.ipInfo != null && !state.value.isLoading && !isStateChanged) {
+    if (!isStart &&
+        state.value.ipInfo != null &&
+        !state.value.isLoading &&
+        !isStateChanged) {
       return;
     }
 

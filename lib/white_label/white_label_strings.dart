@@ -1,4 +1,4 @@
-﻿import 'package:bett_box/white_label/white_label_config.dart';
+import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:flutter/widgets.dart';
 
 class WhiteLabelStrings {
@@ -6,84 +6,115 @@ class WhiteLabelStrings {
 
   const WhiteLabelStrings(this.locale);
 
-  String get website => 'Website';
-  String get support => 'Support';
-  String get onlineSupport => 'Online support';
-  String get signedIn => 'Signed in';
-  String get userData => 'User data';
-  String get expires => 'Expires';
-  String get noPlanData => 'No plan data';
-  String get unlimited => 'Unlimited';
-  String get never => 'Never';
-  String get signOut => 'Sign out';
-  String get signOutDesc => 'Clear this account and subscription';
-  String get logoutFailed => 'Logout failed';
-  String get aboutDesc =>
-      '$whiteLabelDisplayName is based on the Mihomo proxy core and built for a better experience.';
+  bool get _isZh => locale.languageCode == 'zh';
+  bool get _isTraditional =>
+      locale.scriptCode == 'Hant' ||
+      locale.countryCode == 'TW' ||
+      locale.countryCode == 'HK' ||
+      locale.countryCode == 'MO';
 
-  String get announcements => 'Announcements';
-  String get announcementsDesc => 'Service notices';
-  String get noAnnouncements => 'No announcements';
-  String get tickets => 'Tickets';
-  String get ticketsDesc => 'Questions and replies';
-  String get noTickets => 'No tickets';
-  String get newTicket => 'New ticket';
-  String get subject => 'Subject';
-  String get message => 'Message';
-  String get priority => 'Priority';
-  String get priorityLow => 'Low';
-  String get priorityMedium => 'Medium';
-  String get priorityHigh => 'High';
-  String get submit => 'Submit';
-  String get reply => 'Reply';
-  String get send => 'Send';
-  String get closed => 'Closed';
-  String get pendingReply => 'Waiting for support';
-  String get loadFailed => 'Failed to load';
-  String get retry => 'Retry';
-  String get requiredField => 'This field is required';
-  String get ticketCreated => 'Ticket submitted';
-  String get replySent => 'Reply sent';
-  String get me => 'Me';
-  String get supportAgent => 'Support';
-  String get tutorials => 'Tutorials';
-  String get tutorialsDesc => 'Usage and connection guides';
-  String get noTutorials => 'No tutorials';
-  String get purchase => 'Purchase';
-  String get purchaseDesc => 'Plans and orders';
-  String get plans => 'Plans';
-  String get orders => 'Orders';
-  String get noPlans => 'No plans available';
-  String get noOrders => 'No orders';
-  String get traffic => 'Traffic';
-  String get buyNow => 'Buy now';
-  String get selectPeriod => 'Select billing period';
-  String get confirmOrder => 'Confirm order';
-  String get orderDetails => 'Order details';
-  String get orderNumber => 'Order number';
-  String get plan => 'Plan';
-  String get period => 'Period';
-  String get status => 'Status';
-  String get amount => 'Amount';
-  String get createdAt => 'Created at';
-  String get paymentMethod => 'Payment method';
-  String get continuePayment => 'Continue payment';
-  String get payment => 'Payment';
-  String get paymentFailed => 'Payment could not start';
-  String get noPaymentMethods => 'No payment methods are available';
-  String get paymentDataInvalid =>
-      'The payment response could not be recognized';
-  String get checkPayment => 'Check payment';
-  String get paymentPending => 'Payment is still pending';
-  String get openExternal => 'Open in browser';
-  String get scanOrOpenPayment => 'Complete payment with your payment app';
-  String get paymentPageFailed =>
-      'The payment page could not be opened securely';
-  String get servicesAndAccount => 'Services and account';
-  String get tapToExpand => 'Tap to expand';
-  String get tapToCollapse => 'Tap to collapse';
-  String get refreshSubscription => 'Refresh subscription';
-  String get subscriptionUpdated => 'Subscription updated';
+  String _t(String simplified, String traditional, String english) {
+    if (!_isZh) return english;
+    return _isTraditional ? traditional : simplified;
+  }
+
+  String get website => _t('官网', '官網', 'Website');
+  String get support => _t('客服', '客服', 'Support');
+  String get onlineSupport => _t('在线客服', '線上客服', 'Online support');
+  String get signedIn => _t('已登录', '已登入', 'Signed in');
+  String get userData => _t('用户数据', '使用者資料', 'User data');
+  String get expires => _t('到期时间', '到期時間', 'Expires');
+  String get noPlanData => _t('暂无套餐数据', '暫無套餐資料', 'No plan data');
+  String get unlimited => _t('不限量', '不限量', 'Unlimited');
+  String get never => _t('永久', '永久', 'Never');
+  String get signOut => _t('退出登录', '登出', 'Sign out');
+  String get signOutDesc =>
+      _t('清除此账号和订阅', '清除此帳號和訂閱', 'Clear this account and subscription');
+  String get logoutFailed => _t('退出失败', '登出失敗', 'Logout failed');
+  String get aboutDesc => _t(
+    '$whiteLabelDisplayName 基于 Mihomo 代理内核，致力于更好的体验。',
+    '$whiteLabelDisplayName 基於 Mihomo 代理核心，致力於更好的體驗。',
+    '$whiteLabelDisplayName is based on the Mihomo proxy core and built for a better experience.',
+  );
+
+  String get announcements => _t('公告', '公告', 'Announcements');
+  String get announcementsDesc => _t('服务公告', '服務公告', 'Service notices');
+  String get noAnnouncements => _t('暂无公告', '暫無公告', 'No announcements');
+  String get tickets => _t('工单', '工單', 'Tickets');
+  String get ticketsDesc => _t('问题与回复', '問題與回覆', 'Questions and replies');
+  String get noTickets => _t('暂无工单', '暫無工單', 'No tickets');
+  String get newTicket => _t('新建工单', '新增工單', 'New ticket');
+  String get subject => _t('主题', '主旨', 'Subject');
+  String get message => _t('内容', '內容', 'Message');
+  String get priority => _t('优先级', '優先級', 'Priority');
+  String get priorityLow => _t('低', '低', 'Low');
+  String get priorityMedium => _t('中', '中', 'Medium');
+  String get priorityHigh => _t('高', '高', 'High');
+  String get submit => _t('提交', '提交', 'Submit');
+  String get reply => _t('回复', '回覆', 'Reply');
+  String get send => _t('发送', '傳送', 'Send');
+  String get closed => _t('已关闭', '已關閉', 'Closed');
+  String get pendingReply => _t('等待客服回复', '等待客服回覆', 'Waiting for support');
+  String get loadFailed => _t('加载失败', '載入失敗', 'Failed to load');
+  String get retry => _t('重试', '重試', 'Retry');
+  String get requiredField => _t('此项不能为空', '此欄位不可為空', 'This field is required');
+  String get ticketCreated => _t('工单已提交', '工單已提交', 'Ticket submitted');
+  String get replySent => _t('回复已发送', '回覆已傳送', 'Reply sent');
+  String get me => _t('我', '我', 'Me');
+  String get supportAgent => _t('客服', '客服', 'Support');
+  String get tutorials => _t('教程', '教學', 'Tutorials');
+  String get tutorialsDesc =>
+      _t('使用与连接教程', '使用與連線教學', 'Usage and connection guides');
+  String get noTutorials => _t('暂无教程', '暫無教學', 'No tutorials');
+  String get purchase => _t('购买', '購買', 'Purchase');
+  String get purchaseDesc => _t('套餐与订单', '方案與訂單', 'Plans and orders');
+  String get plans => _t('套餐', '方案', 'Plans');
+  String get orders => _t('订单', '訂單', 'Orders');
+  String get noPlans => _t('暂无可购买套餐', '暫無可購買方案', 'No plans available');
+  String get noOrders => _t('暂无订单', '暫無訂單', 'No orders');
+  String get traffic => _t('流量', '流量', 'Traffic');
+  String get buyNow => _t('立即购买', '立即購買', 'Buy now');
+  String get selectPeriod => _t('选择订阅周期', '選擇訂閱週期', 'Select billing period');
+  String get confirmOrder => _t('确认订单', '確認訂單', 'Confirm order');
+  String get orderDetails => _t('订单详情', '訂單詳情', 'Order details');
+  String get orderNumber => _t('订单号', '訂單號', 'Order number');
+  String get plan => _t('套餐', '方案', 'Plan');
+  String get period => _t('周期', '週期', 'Period');
+  String get status => _t('状态', '狀態', 'Status');
+  String get amount => _t('金额', '金額', 'Amount');
+  String get createdAt => _t('创建时间', '建立時間', 'Created at');
+  String get paymentMethod => _t('支付方式', '付款方式', 'Payment method');
+  String get continuePayment => _t('继续支付', '繼續付款', 'Continue payment');
+  String get payment => _t('支付', '付款', 'Payment');
+  String get paymentFailed => _t('支付未能启动', '付款未能啟動', 'Payment could not start');
+  String get noPaymentMethods =>
+      _t('暂无可用支付方式', '暫無可用付款方式', 'No payment methods are available');
+  String get paymentDataInvalid => _t(
+    '无法识别支付响应',
+    '無法識別付款回應',
+    'The payment response could not be recognized',
+  );
+  String get checkPayment => _t('检查支付状态', '檢查付款狀態', 'Check payment');
+  String get paymentPending =>
+      _t('支付仍在处理中', '付款仍在處理中', 'Payment is still pending');
+  String get openExternal => _t('用浏览器打开', '用瀏覽器開啟', 'Open in browser');
+  String get scanOrOpenPayment => _t(
+    '请使用支付应用完成支付',
+    '請使用付款應用完成付款',
+    'Complete payment with your payment app',
+  );
+  String get paymentPageFailed => _t(
+    '支付页面无法安全打开',
+    '付款頁面無法安全開啟',
+    'The payment page could not be opened securely',
+  );
+  String get servicesAndAccount => _t('服务与账号', '服務與帳號', 'Services and account');
+  String get tapToExpand => _t('点击展开', '點擊展開', 'Tap to expand');
+  String get tapToCollapse => _t('点击收起', '點擊收起', 'Tap to collapse');
+  String get refreshSubscription =>
+      _t('刷新订阅', '重新整理訂閱', 'Refresh subscription');
+  String get subscriptionUpdated =>
+      _t('订阅已更新', '訂閱已更新', 'Subscription updated');
 }
 
 WhiteLabelStrings whiteLabelStringsOf(BuildContext context) {

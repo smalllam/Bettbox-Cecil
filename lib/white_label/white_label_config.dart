@@ -42,6 +42,7 @@ const whiteLabelProfileId = String.fromEnvironment(
 );
 const whiteLabelConfigTxtHost = String.fromEnvironment('CONFIG_TXT_HOST');
 const whiteLabelConfigCiphertext = String.fromEnvironment('CONFIG_CIPHERTEXT');
+const whiteLabelDisclaimerText = String.fromEnvironment('DISCLAIMER_TEXT');
 
 const whiteLabelAuthTokenKey = 'white_label_auth_token';
 const whiteLabelAuthDataKey = 'white_label_auth_data';

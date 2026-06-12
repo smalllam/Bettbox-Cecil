@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -1115,7 +1115,11 @@ class AppController {
               child: Text(appLocalizations.agree),
             ),
           ],
-          child: SelectableText(appLocalizations.disclaimerDesc),
+          child: SelectableText(
+            whiteLabelDisclaimerText.trim().isEmpty
+                ? appLocalizations.disclaimerDesc
+                : whiteLabelDisclaimerText,
+          ),
         ),
       ),
     );
