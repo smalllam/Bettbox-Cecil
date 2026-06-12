@@ -257,8 +257,8 @@ class _WhiteLabelLoadingViewState extends State<_WhiteLabelLoadingView>
                               scale: 1.12 - (0.12 * focus),
                               child: Image.asset(
                                 whiteLabelLogoAsset,
-                                width: 80,
-                                height: 80,
+                                width: 128,
+                                height: 128,
                                 fit: BoxFit.contain,
                               ),
                             ),
