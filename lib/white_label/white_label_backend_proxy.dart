@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/clash/clash.dart';
@@ -68,9 +68,11 @@ class WhiteLabelBackendProxy {
       }
       _temporaryStarted = true;
     } catch (e) {
-      commonPrint.log('Failed to start WhiteLabel backend proxy: $e');
+      commonPrint.log(
+        'Failed to start WhiteLabel backend proxy: ${e.runtimeType}',
+      );
       _temporaryStarted = false;
-      rethrow;
+      throw 'Backend proxy failed to start. Please check network and provider configuration.';
     }
   }
 
@@ -78,7 +80,14 @@ class WhiteLabelBackendProxy {
     if (whiteLabelBootstrapProxy.trim().isEmpty) {
       throw StateError('BOOTSTRAP_PROXY_URI is not configured.');
     }
-    final uri = Uri.parse(whiteLabelBootstrapProxy);
+    final uri = Uri.tryParse(whiteLabelBootstrapProxy);
+    if (uri == null ||
+        uri.scheme.toLowerCase() != 'trojan' ||
+        uri.host.isEmpty ||
+        !uri.hasPort ||
+        uri.userInfo.isEmpty) {
+      throw StateError('BOOTSTRAP_PROXY_URI is invalid.');
+    }
     final password = Uri.decodeComponent(uri.userInfo);
     final name = uri.fragment.isEmpty
         ? whiteLabelBootstrapProxyName

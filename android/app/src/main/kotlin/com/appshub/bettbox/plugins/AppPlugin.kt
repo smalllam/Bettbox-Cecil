@@ -271,6 +271,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun openPaymentUrl(rawUrl: String?): Boolean {
         if (rawUrl.isNullOrBlank()) return false
         val context = activityRef?.get() ?: BettboxApplication.getAppContext()
+        val safeUrl = describePaymentUrl(rawUrl)
         val intent = runCatching {
             if (rawUrl.startsWith("intent://", ignoreCase = true)) {
                 Intent.parseUri(rawUrl, Intent.URI_INTENT_SCHEME).apply {
@@ -293,14 +294,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 }
             }
         }.onFailure {
-            Log.e("WhiteLabelPayment", "Invalid payment URL: $rawUrl", it)
+            Log.e("WhiteLabelPayment", "Invalid payment URL: $safeUrl", it)
         }.getOrNull() ?: return false
 
         return runCatching {
             if (context !is Activity) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            Log.i("WhiteLabelPayment", "Opening payment URL: $rawUrl")
+            Log.i("WhiteLabelPayment", "Opening payment URL: $safeUrl")
             context.startActivity(intent)
             true
         }.recoverCatching {
@@ -316,8 +317,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             context.startActivity(fallbackIntent)
             true
         }.onFailure {
-            Log.e("WhiteLabelPayment", "Failed to open payment URL: $rawUrl", it)
+            Log.e("WhiteLabelPayment", "Failed to open payment URL: $safeUrl", it)
         }.getOrDefault(false)
+    }
+
+    private fun describePaymentUrl(rawUrl: String): String {
+        return runCatching {
+            val uri = Uri.parse(rawUrl)
+            val keys = uri.queryParameterNames.sorted().joinToString(",")
+            val keyText = if (keys.isBlank()) "" else "?keys=$keys"
+            "${uri.scheme}://${uri.host ?: ""}${uri.path ?: ""}$keyText"
+        }.getOrDefault("invalid")
     }
 
     private fun updateExcludeFromRecents(value: Boolean?) {

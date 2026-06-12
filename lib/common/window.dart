@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/common/common.dart';
@@ -21,9 +21,6 @@ class Window {
     }
     if (system.isWindows) {
       protocol.register(whiteLabelUriScheme);
-      protocol.register('clash');
-      protocol.register('clashmeta');
-      protocol.register('bettbox');
     }
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(

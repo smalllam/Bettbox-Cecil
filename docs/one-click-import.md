@@ -16,14 +16,9 @@ panel. The client stores it locally, fetches the user's subscription from the
 configured panel API, downloads the subscription config, and hides the raw
 subscription URL from the user.
 
-Legacy profile import is still accepted with:
-
-```text
-yourapp://install-config?url=<url-encoded-subscription-url>
-```
-
-For white-label provider builds, prefer `authData` so the website does not
-expose the real subscription URL.
+Raw subscription URL import is intentionally not accepted in Cecil-style
+white-label builds. If a link uses `url=<subscription-url>`, the client rejects
+it and asks the user to import from the official website with `authData`.
 
 ## Client configuration
 

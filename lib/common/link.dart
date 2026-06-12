@@ -17,6 +17,12 @@ class InstallConfigLink {
 
 typedef InstallConfigCallBack = void Function(InstallConfigLink link);
 
+String _safeLinkLog(Uri uri) {
+  final keys = uri.queryParametersAll.keys.toList()..sort();
+  final keyText = keys.isEmpty ? '' : '?keys=${keys.join(',')}';
+  return '${uri.scheme}://${uri.host}${uri.path}$keyText';
+}
+
 class LinkManager {
   static LinkManager? _instance;
   late AppLinks _appLinks;
@@ -32,7 +38,7 @@ class LinkManager {
     commonPrint.log('initAppLinksListen');
     destroy();
     subscription = _appLinks.uriLinkStream.listen((uri) {
-      commonPrint.log('onAppLink: $uri');
+      commonPrint.log('onAppLink: ${_safeLinkLog(uri)}');
       if (uri.host == 'install-config') {
         final parameters = uri.queryParameters;
         final link = InstallConfigLink(

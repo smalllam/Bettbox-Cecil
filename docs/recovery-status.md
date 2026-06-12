@@ -82,16 +82,14 @@ or private artwork belong here.
 | Disclaimer | Done | Provider can pass `DISCLAIMER_TEXT`; acceptance remains stored in app settings. |
 | Windows packaging | Done | Full compatible Windows installer build was verified locally. |
 | Provider examples | Done | Generic dart-define, update manifest, and one-click import examples are included under `examples/white-label/`. |
-| Android packaging | Pending environment | Source is prepared, but final Android signing/build validation requires Android SDK/keystore setup in the build environment. |
+| Android packaging | Done | Android arm64 and arm release builds were verified locally with private build secrets. |
 
 ## Next Recovery Steps
 
-1. Run Android build validation in a machine/CI environment with Android SDK and
-   signing secrets configured.
-2. Add provider-specific private build scripts outside this public repository.
-3. Copy `examples/white-label/dart-defines.example.json` to a private location
+1. Add provider-specific private build scripts outside this public repository.
+2. Copy `examples/white-label/dart-defines.example.json` to a private location
    and inject provider values with `--dart-define-from-file`.
-4. Smoke test a real provider panel:
+3. Smoke test a real provider panel:
    - login,
    - subscription import,
    - refresh subscription,

@@ -44,7 +44,7 @@ class WhiteLabelStrings {
   String get ticketsDesc => _t('问题与回复', '問題與回覆', 'Questions and replies');
   String get noTickets => _t('暂无工单', '暫無工單', 'No tickets');
   String get newTicket => _t('新建工单', '新增工單', 'New ticket');
-  String get subject => _t('主题', '主題', 'Subject');
+  String get subject => _t('主题', '主旨', 'Subject');
   String get message => _t('内容', '內容', 'Message');
   String get priority => _t('优先级', '優先級', 'Priority');
   String get priorityLow => _t('低', '低', 'Low');
@@ -52,14 +52,14 @@ class WhiteLabelStrings {
   String get priorityHigh => _t('高', '高', 'High');
   String get submit => _t('提交', '提交', 'Submit');
   String get reply => _t('回复', '回覆', 'Reply');
-  String get send => _t('发送', '傳送', 'Send');
+  String get send => _t('发送', '送出', 'Send');
   String get closed => _t('已关闭', '已關閉', 'Closed');
   String get pendingReply => _t('等待客服回复', '等待客服回覆', 'Waiting for support');
   String get loadFailed => _t('加载失败', '載入失敗', 'Failed to load');
   String get retry => _t('重试', '重試', 'Retry');
   String get requiredField => _t('此项不能为空', '此欄位不可為空', 'This field is required');
   String get ticketCreated => _t('工单已提交', '工單已提交', 'Ticket submitted');
-  String get replySent => _t('回复已发送', '回覆已傳送', 'Reply sent');
+  String get replySent => _t('回复已发送', '回覆已送出', 'Reply sent');
   String get me => _t('我', '我', 'Me');
   String get supportAgent => _t('客服', '客服', 'Support');
   String get tutorials => _t('教程', '教學', 'Tutorials');
@@ -100,7 +100,7 @@ class WhiteLabelStrings {
   String get openExternal => _t('用浏览器打开', '用瀏覽器開啟', 'Open in browser');
   String get scanOrOpenPayment => _t(
     '请使用支付应用完成支付',
-    '請使用付款應用完成付款',
+    '請使用付款 App 完成付款',
     'Complete payment with your payment app',
   );
   String get paymentPageFailed => _t(
@@ -110,7 +110,7 @@ class WhiteLabelStrings {
   );
   String get paymentAppMissing => _t(
     '无法打开支付应用，请确认已安装微信或支付宝。',
-    '無法開啟付款應用，請確認已安裝微信或支付寶。',
+    '無法開啟付款 App，請確認已安裝微信或支付寶。',
     'Could not open the payment app. Please make sure it is installed.',
   );
   String get servicesAndAccount => _t('服务与账号', '服務與帳號', 'Services and account');
@@ -127,7 +127,7 @@ class WhiteLabelStrings {
   );
   String get unsupportedImportLink => _t(
     '请从官网使用一键导入登录。',
-    '請從官網使用一鍵匯入登入。',
+    '請從官網使用一鍵導入登入。',
     'Please use one-click login import from the website.',
   );
   String get allPlans => _t('全部套餐', '全部方案', 'All plans');
