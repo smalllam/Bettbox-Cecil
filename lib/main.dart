@@ -28,7 +28,11 @@ Future<void> main() async {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
 
   final version = await system.version;
-  await MerchantConfig.initialize();
+  try {
+    await MerchantConfig.initialize();
+  } catch (e) {
+    commonPrint.log('Failed to initialize merchant config: $e');
+  }
   await clashCore.preload();
   await globalState.initApp(version);
 
