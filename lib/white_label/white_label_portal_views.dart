@@ -122,7 +122,7 @@ class WhiteLabelRichContent extends StatelessWidget {
           }
         }
         if (element.localName == 'svg') {
-          return const Icon(Icons.check, size: 16, color: Colors.white);
+          return _WhiteLabelInlineSvg(element: element);
         }
         return null;
       },
@@ -146,6 +146,40 @@ class WhiteLabelRichContent extends StatelessWidget {
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+}
+
+class _WhiteLabelInlineSvg extends StatelessWidget {
+  final dom.Element element;
+
+  const _WhiteLabelInlineSvg({required this.element});
+
+  double? _dimension(String name) {
+    final raw = element.attributes[name]?.trim();
+    if (raw == null || raw.isEmpty) return null;
+    return double.tryParse(raw.replaceAll(RegExp(r'[^0-9.]'), ''));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = _dimension('width');
+    final height = _dimension('height');
+    final svg = element.outerHtml;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width,
+          maxHeight: 480,
+        ),
+        child: SvgPicture.string(
+          svg,
+          width: width,
+          height: height,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 }

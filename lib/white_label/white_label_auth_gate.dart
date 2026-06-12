@@ -294,6 +294,18 @@ class _WhiteLabelLoadingViewState extends State<_WhiteLabelLoadingView>
   }
 }
 
+const Map<String, (String, String)> _loginTextOverrides = {
+  'Email': ('邮箱', '電子郵箱'),
+  'Enter your email.': ('请输入邮箱。', '請輸入電子郵箱。'),
+  'Password': ('密码', '密碼'),
+  'Show password': ('显示密码', '顯示密碼'),
+  'Hide password': ('隐藏密码', '隱藏密碼'),
+  'Enter your password.': ('请输入密码。', '請輸入密碼。'),
+  'Sign in': ('登录', '登入'),
+  'Open website': ('打开官网', '開啟官網'),
+  'Support': ('客服', '客服'),
+};
+
 class WhiteLabelLoginView extends StatefulWidget {
   final String? initialMessage;
   final ValueChanged<WhiteLabelSession> onSuccess;
@@ -373,7 +385,7 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
     if (message.contains('connection timeout') ||
         message.contains('receive timeout') ||
         message.contains('send timeout')) {
-      return 'Connection timed out. Please check your network and try again.';
+      return '连接超时，请检查网络后重试。';
     }
     return message;
   }
@@ -382,6 +394,11 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
   Widget build(BuildContext context) {
     String localized(String simplified, String traditional, String english) {
       final locale = Localizations.localeOf(context);
+      final override = _loginTextOverrides[english];
+      if (override != null) {
+        simplified = override.$1;
+        traditional = override.$2;
+      }
       if (locale.languageCode != 'zh') return english;
       final isTraditional =
           locale.scriptCode == 'Hant' ||

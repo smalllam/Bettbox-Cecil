@@ -22,9 +22,9 @@ class WhiteLabelStrings {
   String get support => _t('客服', '客服', 'Support');
   String get onlineSupport => _t('在线客服', '線上客服', 'Online support');
   String get signedIn => _t('已登录', '已登入', 'Signed in');
-  String get userData => _t('用户数据', '使用者資料', 'User data');
+  String get userData => _t('用户数据', '用戶資料', 'User data');
   String get expires => _t('到期时间', '到期時間', 'Expires');
-  String get noPlanData => _t('暂无套餐数据', '暫無套餐資料', 'No plan data');
+  String get noPlanData => _t('暂无套餐数据', '暫無方案資料', 'No plan data');
   String get unlimited => _t('不限量', '不限量', 'Unlimited');
   String get never => _t('永久', '永久', 'Never');
   String get signOut => _t('退出登录', '登出', 'Sign out');
@@ -44,7 +44,7 @@ class WhiteLabelStrings {
   String get ticketsDesc => _t('问题与回复', '問題與回覆', 'Questions and replies');
   String get noTickets => _t('暂无工单', '暫無工單', 'No tickets');
   String get newTicket => _t('新建工单', '新增工單', 'New ticket');
-  String get subject => _t('主题', '主旨', 'Subject');
+  String get subject => _t('主题', '主題', 'Subject');
   String get message => _t('内容', '內容', 'Message');
   String get priority => _t('优先级', '優先級', 'Priority');
   String get priorityLow => _t('低', '低', 'Low');

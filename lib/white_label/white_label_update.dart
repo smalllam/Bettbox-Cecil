@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/common/common.dart';
 import 'package:bett_box/plugins/app.dart';
 import 'package:bett_box/state.dart';
+import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -236,9 +236,7 @@ class WhiteLabelUpdateService {
           options: Options(responseType: ResponseType.bytes),
           onReceiveProgress: (received, total) {
             if (total > 0 && received == total) {
-              globalState.showNotifier(
-                'Download complete. Preparing update...',
-              );
+              globalState.showNotifier('下载完成，正在准备更新...');
             }
           },
         );
