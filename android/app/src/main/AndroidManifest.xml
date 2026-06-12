@@ -61,9 +61,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="clash" android:host="install-config" />
-                <data android:scheme="clashmeta" android:host="install-config" />
-                <data android:scheme="bettbox" android:host="install-config" />
                 <data android:scheme="${appScheme}" android:host="install-config" />
             </intent-filter>
         </activity>

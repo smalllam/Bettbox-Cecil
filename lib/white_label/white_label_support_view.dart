@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:bett_box/white_label/white_label_config.dart';
@@ -82,60 +81,23 @@ String? get _crispWebsiteId {
   return id.trim().isEmpty ? null : id.trim();
 }
 
-String _crispHtml(String websiteId) {
-  final id = jsonEncode(websiteId);
-  return '''
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: #f7fbfa;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-  </style>
-</head>
-<body>
-  <script>
-    window.\$crisp = [];
-    window.CRISP_WEBSITE_ID = $id;
-    (function () {
-      var d = document;
-      var s = d.createElement("script");
-      s.src = "https://client.crisp.chat/l.js";
-      s.async = 1;
-      d.getElementsByTagName("head")[0].appendChild(s);
-    })();
-    window.\$crisp.push(["do", "chat:open"]);
-  </script>
-</body>
-</html>
-''';
-}
-
-Future<String> _desktopSupportTarget() async {
+Uri _supportTargetUri() {
   final webUrl = whiteLabelSupportUrl.trim();
-  if (webUrl.isNotEmpty) return webUrl;
+  if (webUrl.isNotEmpty) {
+    final uri = Uri.tryParse(webUrl);
+    if (uri != null && uri.hasScheme) return uri;
+  }
 
   final websiteId = _crispWebsiteId;
   if (websiteId == null) {
     throw StateError('Support URL is not configured.');
   }
 
-  final dataDirectory = await appPath.dataDir.future;
-  final supportDirectory = Directory(
-    '${dataDirectory.path}${Platform.pathSeparator}support_webview',
-  );
-  await supportDirectory.create(recursive: true);
-  final htmlFile = File(
-    '${supportDirectory.path}${Platform.pathSeparator}crisp.html',
-  );
-  await htmlFile.writeAsString(_crispHtml(websiteId));
-  return htmlFile.uri.toString();
+  return Uri.https('go.crisp.chat', '/chat/embed/', {'website_id': websiteId});
+}
+
+Future<String> _desktopSupportTarget() async {
+  return _supportTargetUri().toString();
 }
 
 class WhiteLabelSupportView extends StatefulWidget {
@@ -173,16 +135,10 @@ class _WhiteLabelSupportViewState extends State<WhiteLabelSupportView> {
           },
         ),
       );
-    final webUrl = whiteLabelSupportUrl.trim();
-    if (webUrl.isNotEmpty) {
-      _controller!.loadRequest(Uri.parse(webUrl));
-    } else {
-      final websiteId = _crispWebsiteId;
-      if (websiteId == null) {
-        _loading = false;
-      } else {
-        _controller!.loadHtmlString(_crispHtml(websiteId));
-      }
+    try {
+      _controller!.loadRequest(_supportTargetUri());
+    } catch (_) {
+      _loading = false;
     }
   }
 

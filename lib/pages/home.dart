@@ -1,4 +1,4 @@
-﻿import 'package:bett_box/white_label/white_label_support_view.dart';
+import 'package:bett_box/white_label/white_label_support_view.dart';
 import 'package:bett_box/common/common.dart';
 import 'package:bett_box/enum/enum.dart';
 import 'package:bett_box/models/models.dart';
@@ -397,9 +397,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   }
 
   int get _pageIndex {
-    return widget.navigationItems.indexWhere(
+    final index = widget.navigationItems.indexWhere(
       (item) => item.label == globalState.appState.pageLabel,
     );
+    return index == -1 ? 0 : index;
   }
 
   Future<void> _toPage(
