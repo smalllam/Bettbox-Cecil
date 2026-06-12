@@ -271,8 +271,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun openPaymentUrl(rawUrl: String?): Boolean {
         if (rawUrl.isNullOrBlank()) return false
         val context = activityRef?.get() ?: BettboxApplication.getAppContext()
-        return runCatching {
-            val intent = if (rawUrl.startsWith("intent://", ignoreCase = true)) {
+        val intent = runCatching {
+            if (rawUrl.startsWith("intent://", ignoreCase = true)) {
                 Intent.parseUri(rawUrl, Intent.URI_INTENT_SCHEME).apply {
                     addCategory(Intent.CATEGORY_BROWSABLE)
                     component = null
@@ -281,18 +281,39 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             } else {
                 val uri = Uri.parse(rawUrl)
                 Intent(Intent.ACTION_VIEW, uri).apply {
-                    when (uri.scheme?.lowercase()) {
-                        "weixin" -> setPackage("com.tencent.mm")
-                        "alipay", "alipays" ->
+                    when {
+                        uri.scheme?.lowercase() == "weixin" -> setPackage("com.tencent.mm")
+                        uri.host?.lowercase()?.contains("weixin.qq.com") == true -> setPackage("com.tencent.mm")
+                        uri.host?.lowercase()?.contains("tenpay.com") == true -> setPackage("com.tencent.mm")
+                        uri.scheme?.lowercase() == "alipay" -> setPackage("com.eg.android.AlipayGphone")
+                        uri.scheme?.lowercase() == "alipays" -> setPackage("com.eg.android.AlipayGphone")
+                        uri.host?.lowercase()?.contains("alipay.com") == true ->
                             setPackage("com.eg.android.AlipayGphone")
                     }
                 }
             }
+        }.onFailure {
+            Log.e("WhiteLabelPayment", "Invalid payment URL: $rawUrl", it)
+        }.getOrNull() ?: return false
+
+        return runCatching {
             if (context !is Activity) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             Log.i("WhiteLabelPayment", "Opening payment URL: $rawUrl")
             context.startActivity(intent)
+            true
+        }.recoverCatching {
+            val fallbackUrl = intent.getStringExtra("browser_fallback_url")
+            if (fallbackUrl.isNullOrBlank()) throw it
+            val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl)).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                if (context !is Activity) {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+            Log.i("WhiteLabelPayment", "Opening payment fallback URL")
+            context.startActivity(fallbackIntent)
             true
         }.onFailure {
             Log.e("WhiteLabelPayment", "Failed to open payment URL: $rawUrl", it)

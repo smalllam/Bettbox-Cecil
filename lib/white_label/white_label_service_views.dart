@@ -6,6 +6,7 @@ import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/white_label/white_label_portal_views.dart';
 import 'package:bett_box/white_label/white_label_strings.dart';
 import 'package:bett_box/common/common.dart';
+import 'package:bett_box/plugins/app.dart';
 import 'package:bett_box/state.dart';
 import 'package:bett_box/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -1153,15 +1154,58 @@ class _WhiteLabelPaymentViewState extends State<_WhiteLabelPaymentView> {
     final value = host.toLowerCase();
     return value == 'ulink.alipay.com' ||
         value.endsWith('.alipay.com') ||
+        value == 'qr.alipay.com' ||
+        value == 'mclient.alipay.com' ||
+        value == 'openapi.alipay.com' ||
         value == 'wx.tenpay.com' ||
+        value.endsWith('.tenpay.com') ||
         value.endsWith('.weixin.qq.com');
+  }
+
+  String? _intentValue(String fragment, String key) {
+    for (final part in fragment.split(';')) {
+      if (part.startsWith(key)) {
+        return Uri.decodeComponent(part.substring(key.length));
+      }
+    }
+    return null;
+  }
+
+  List<Uri> _paymentLaunchCandidates(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return const [];
+    final candidates = <Uri>[];
+    if (uri.scheme.toLowerCase() == 'intent') {
+      final scheme = _intentValue(uri.fragment, 'scheme=');
+      if (scheme != null && scheme.isNotEmpty) {
+        final beforeIntent = url.split('#Intent;').first;
+        final body = beforeIntent.replaceFirst(
+          RegExp('^intent://', caseSensitive: false),
+          '',
+        );
+        final rebuilt = Uri.tryParse('$scheme://$body');
+        if (rebuilt != null) candidates.add(rebuilt);
+      }
+      final fallback = _intentValue(uri.fragment, 'S.browser_fallback_url=');
+      final fallbackUri = fallback == null ? null : Uri.tryParse(fallback);
+      if (fallbackUri != null) candidates.add(fallbackUri);
+    }
+    candidates.add(uri);
+    return candidates;
   }
 
   Future<void> _openPaymentApp(String url) async {
     debugPrint('WhiteLabelPayment: opening external ${_debugUrl(url)}');
     var opened = false;
-    final uri = Uri.tryParse(url);
-    if (uri != null) {
+    if (system.isAndroid) {
+      try {
+        opened = await app.openPaymentUrl(url);
+      } catch (error) {
+        debugPrint('WhiteLabelPayment: native open failed $error');
+      }
+    }
+    for (final uri in _paymentLaunchCandidates(url)) {
+      if (opened) break;
       opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
     if (!opened && mounted) {

@@ -75,13 +75,23 @@ String whiteLabelRichHtml(String source) {
   );
 }
 
+Uri _resolveWhiteLabelContentUri(String source) {
+  final trimmed = source.trim();
+  final base = Uri.parse('$whiteLabelPanelBaseUrl/');
+  if (trimmed.isEmpty) return base;
+  final encoded = Uri.tryParse(Uri.encodeFull(trimmed));
+  if (encoded != null && encoded.hasScheme) return encoded;
+  final direct = Uri.tryParse(trimmed);
+  if (direct != null && direct.hasScheme) return direct;
+  if (encoded != null) return base.resolveUri(encoded);
+  return base.resolve(trimmed);
+}
+
 class _WhiteLabelHtmlFactory extends WidgetFactory {
   @override
   ImageProvider? imageProviderFromNetwork(String url) {
     if (url.isEmpty) return null;
-    final resolved = Uri.parse(
-      '$whiteLabelPanelBaseUrl/',
-    ).resolve(url).toString();
+    final resolved = _resolveWhiteLabelContentUri(url).toString();
     return NetworkImage(
       resolved,
       headers: {
@@ -135,9 +145,7 @@ class WhiteLabelRichContent extends StatelessWidget {
       onErrorBuilder: (_, element, _) {
         final source = element.attributes['src'];
         if (element.localName == 'img' && source != null) {
-          final resolved = Uri.parse(
-            '$whiteLabelPanelBaseUrl/',
-          ).resolve(source);
+          final resolved = _resolveWhiteLabelContentUri(source);
           return TextButton.icon(
             onPressed: () => globalState.openUrl(resolved.toString()),
             icon: const Icon(Icons.image_outlined),
@@ -198,12 +206,7 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
   late final Future<Uint8List> _future = _load();
 
   Uri _resolveSource() {
-    final source = widget.source.trim();
-    final direct = Uri.tryParse(source);
-    if (direct != null && direct.hasScheme) return direct;
-    final encoded = Uri.tryParse(Uri.encodeFull(source));
-    if (encoded != null && encoded.hasScheme) return encoded;
-    return Uri.parse('$whiteLabelPanelBaseUrl/').resolve(source);
+    return _resolveWhiteLabelContentUri(widget.source);
   }
 
   Uint8List? _dataUriBytes(String source) {
@@ -223,7 +226,7 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
   Uint8List? _embeddedRaster(Uint8List svgBytes) {
     final svg = utf8.decode(svgBytes, allowMalformed: true);
     final match = RegExp(
-      r'''(?:xlink:href|href)\s*=\s*["']data:image/(?:png|jpe?g|webp);base64,([^"']+)["']''',
+      r'''(?:xlink:href|href)\s*=\s*["']data:image/(?:png|jpe?g|webp);base64,\s*([^"']+)["']''',
       caseSensitive: false,
     ).firstMatch(svg);
     if (match == null) return null;
@@ -232,6 +235,15 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
     } catch (_) {
       return null;
     }
+  }
+
+  bool _looksLikeSvg(Uint8List bytes) {
+    final length = bytes.length < 1024 ? bytes.length : 1024;
+    final sample = utf8
+        .decode(bytes.sublist(0, length), allowMalformed: true)
+        .trimLeft();
+    return sample.startsWith('<svg') ||
+        (sample.startsWith('<?xml') && sample.contains('<svg'));
   }
 
   Future<Uint8List> _load() async {
@@ -276,7 +288,9 @@ class _WhiteLabelNetworkImageState extends State<_WhiteLabelNetworkImage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final resolved = _resolveSource();
-          final isSvg = resolved.path.toLowerCase().endsWith('.svg');
+          final isSvg =
+              resolved.path.toLowerCase().endsWith('.svg') ||
+              _looksLikeSvg(snapshot.data!);
           final embeddedRaster = isSvg ? _embeddedRaster(snapshot.data!) : null;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
