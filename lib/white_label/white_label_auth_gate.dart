@@ -257,8 +257,8 @@ class _WhiteLabelLoadingViewState extends State<_WhiteLabelLoadingView>
                               scale: 1.12 - (0.12 * focus),
                               child: Image.asset(
                                 whiteLabelLogoAsset,
-                                width: 220,
-                                height: 220,
+                                width: 80,
+                                height: 80,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -401,8 +401,8 @@ class _WhiteLabelLoginViewState extends State<WhiteLabelLoginView> {
             Center(
               child: Image.asset(
                 whiteLabelLogoAsset,
-                width: 180,
-                height: 180,
+                width: 112,
+                height: 112,
                 fit: BoxFit.contain,
               ),
             ),
