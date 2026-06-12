@@ -1389,14 +1389,14 @@ class AppController {
       final tempDir = Directory.systemTemp;
       final tempZipPath = join(
         tempDir.path,
-        'bettbox_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
+        'cecil_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
       );
       final encoder = ZipFileEncoder();
       encoder.create(tempZipPath);
 
       // Add marker file
       final markerData = json.encode({
-        'app': 'Bettbox',
+        'app': 'Cecil',
         'version': '1.0',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
@@ -1404,11 +1404,11 @@ class AppController {
       final tempMarkerFile = File(
         join(
           tempDir.path,
-          'bettbox_marker_${DateTime.now().millisecondsSinceEpoch}.tmp',
+          'cecil_marker_${DateTime.now().millisecondsSinceEpoch}.tmp',
         ),
       );
       await tempMarkerFile.writeAsBytes(markerBytes);
-      await encoder.addFile(tempMarkerFile, '.bettbox_marker');
+      await encoder.addFile(tempMarkerFile, '.cecil_marker');
       await tempMarkerFile.delete();
 
       // Add config file
@@ -1416,7 +1416,7 @@ class AppController {
       final tempConfigFile = File(
         join(
           tempDir.path,
-          'bettbox_config_${DateTime.now().millisecondsSinceEpoch}.tmp',
+          'cecil_config_${DateTime.now().millisecondsSinceEpoch}.tmp',
         ),
       );
       await tempConfigFile.writeAsString(configStr);
@@ -1555,22 +1555,21 @@ class AppController {
 
     final homeDirPath = await appPath.homeDirPath;
 
-    // Check for Bettbox marker
-    final hasBettboxMarker = archive.files.any(
-      (file) => file.name == '.bettbox_marker',
+    // Check for Cecil marker, while still accepting old Bettbox backups.
+    final hasCecilMarker = archive.files.any(
+      (file) => file.name == '.cecil_marker' || file.name == '.bettbox_marker',
     );
 
-    if (hasBettboxMarker) {
-      // Bettbox backup
-      await _recoveryBettboxBackup(archive, recoveryOption, homeDirPath);
+    if (hasCecilMarker) {
+      await _recoveryCecilBackup(archive, recoveryOption, homeDirPath);
     } else {
       // Legacy backup
       await _recoveryLegacyBackup(archive, recoveryOption, homeDirPath);
     }
   }
 
-  /// Restore Bettbox
-  Future<void> _recoveryBettboxBackup(
+  /// Restore Cecil backup.
+  Future<void> _recoveryCecilBackup(
     Archive archive,
     RecoveryOption recoveryOption,
     String homeDirPath,
@@ -1579,11 +1578,16 @@ class AppController {
     final configs = archive.files
         .where(
           (item) =>
-              item.name.endsWith('.json') && item.name != '.bettbox_marker',
+              item.name.endsWith('.json') &&
+              item.name != '.cecil_marker' &&
+              item.name != '.bettbox_marker',
         )
         .toList();
     final profiles = archive.files.where(
-      (item) => !item.name.endsWith('.json') && item.name != '.bettbox_marker',
+      (item) =>
+          !item.name.endsWith('.json') &&
+          item.name != '.cecil_marker' &&
+          item.name != '.bettbox_marker',
     );
 
     // Find config.json

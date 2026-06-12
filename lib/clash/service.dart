@@ -42,7 +42,7 @@ class ClashService extends ClashHandlerInterface {
     if (_transportType == TransportType.unixSocket) {
       final random = Random().nextInt(10000);
       final tempDir = Directory.systemTemp.path;
-      _socketPath = p.join(tempDir, 'Bettbox_$random.sock');
+      _socketPath = p.join(tempDir, 'Cecil_$random.sock');
       commonPrint.log('Using Unix Domain Socket: $_socketPath');
     } else {
       _tcpPort = PlatformChecker.getRandomPort();
@@ -66,10 +66,7 @@ class ClashService extends ClashHandlerInterface {
           await _deleteSocketFile();
           server = await ServerSocket.bind(address, 0, shared: true);
         } else {
-          server = await ServerSocket.bind(
-            InternetAddress.loopbackIPv4,
-            0,
-          );
+          server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
           _tcpPort = server.port;
           commonPrint.log('TCP Server bound to port: $_tcpPort');
         }
@@ -112,10 +109,13 @@ class ClashService extends ClashHandlerInterface {
 
     process?.kill();
     if (process != null) {
-      await process!.exitCode.timeout(const Duration(seconds: 2), onTimeout: () {
-        process?.kill(ProcessSignal.sigkill);
-        return -1;
-      });
+      await process!.exitCode.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          process?.kill(ProcessSignal.sigkill);
+          return -1;
+        },
+      );
     }
     process = null;
 
@@ -143,7 +143,9 @@ class ClashService extends ClashHandlerInterface {
           isStarting = false;
           return;
         }
-        commonPrint.log('Helper start core failed, falling back to normal mode');
+        commonPrint.log(
+          'Helper start core failed, falling back to normal mode',
+        );
       }
     }
 
