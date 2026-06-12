@@ -151,11 +151,12 @@ class Build {
       workingDirectory: workingDirectory,
       runInShell: runInShell,
     );
+    const outputDecoder = Utf8Decoder(allowMalformed: true);
     process.stdout.listen((data) {
-      print(utf8.decode(data));
+      print(outputDecoder.convert(data));
     });
     process.stderr.listen((data) {
-      print(utf8.decode(data));
+      print(outputDecoder.convert(data));
     });
     final exitCode = await process.exitCode;
     if (exitCode != 0 && name != null) throw '$name error';
