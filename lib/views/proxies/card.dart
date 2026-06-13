@@ -59,10 +59,7 @@ class ProxyCard extends StatelessWidget {
 
           // REJECT, REJECT-DROP, PASS 节点不显示测试按钮
           if (_isNonTestableProxy) {
-            return const SizedBox(
-              height: 0,
-              width: 0,
-            );
+            return const SizedBox(height: 0, width: 0);
           }
 
           if (delay == 0) {
@@ -114,23 +111,37 @@ class ProxyCard extends StatelessWidget {
   ) {
     return switch (animationType) {
       DelayAnimationType.none => Icon(Icons.bolt, size: size),
-      DelayAnimationType.rotatingCircle =>
-        SpinKitRotatingCircle(color: color, size: size),
+      DelayAnimationType.rotatingCircle => SpinKitRotatingCircle(
+        color: color,
+        size: size,
+      ),
       DelayAnimationType.pulse => SpinKitPulse(color: color, size: size),
-      DelayAnimationType.spinningLines =>
-        SpinKitSpinningLines(color: color, size: size),
-      DelayAnimationType.threeInOut =>
-        SpinKitThreeInOut(color: color, size: size),
-      DelayAnimationType.threeBounce =>
-        SpinKitThreeBounce(color: color, size: size),
+      DelayAnimationType.spinningLines => SpinKitSpinningLines(
+        color: color,
+        size: size,
+      ),
+      DelayAnimationType.threeInOut => SpinKitThreeInOut(
+        color: color,
+        size: size,
+      ),
+      DelayAnimationType.threeBounce => SpinKitThreeBounce(
+        color: color,
+        size: size,
+      ),
       DelayAnimationType.circle => SpinKitCircle(color: color, size: size),
-      DelayAnimationType.fadingCircle =>
-        SpinKitFadingCircle(color: color, size: size),
-      DelayAnimationType.fadingFour =>
-        SpinKitFadingFour(color: color, size: size),
+      DelayAnimationType.fadingCircle => SpinKitFadingCircle(
+        color: color,
+        size: size,
+      ),
+      DelayAnimationType.fadingFour => SpinKitFadingFour(
+        color: color,
+        size: size,
+      ),
       DelayAnimationType.wave => SpinKitWave(color: color, size: size),
-      DelayAnimationType.doubleBounce =>
-        SpinKitDoubleBounce(color: color, size: size),
+      DelayAnimationType.doubleBounce => SpinKitDoubleBounce(
+        color: color,
+        size: size,
+      ),
     };
   }
 
@@ -265,19 +276,7 @@ class ProxyCard extends StatelessWidget {
                             children: [
                               Flexible(
                                 flex: 1,
-                                child: TooltipText(
-                                  text: Text(
-                                    proxy.type,
-                                    style: context.textTheme.bodySmall?.copyWith(
-                                      overflow: TextOverflow.ellipsis,
-                                      color: context
-                                          .textTheme
-                                          .bodySmall
-                                          ?.color
-                                          ?.opacity80,
-                                    ),
-                                  ),
-                                ),
+                                child: _ProxySubtitle(proxy: proxy),
                               ),
                               delayText,
                             ],
@@ -296,6 +295,41 @@ class ProxyCard extends StatelessWidget {
               child: _ProxyComputedMark(groupName: groupName, proxy: proxy),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProxySubtitle extends ConsumerWidget {
+  final Proxy proxy;
+
+  const _ProxySubtitle({required this.proxy});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final group = ref.watch(
+      groupsProvider.select((groups) => groups.getGroup(proxy.name)),
+    );
+    var text = proxy.type;
+    if (group != null) {
+      final selectedName = ref
+          .watch(getProxyCardStateProvider(proxy.name))
+          .proxyName;
+      if (selectedName.isNotEmpty) {
+        text = selectedName;
+      } else if (group.realNow.isNotEmpty) {
+        text = group.realNow;
+      }
+    }
+
+    return TooltipText(
+      text: EmojiText(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textTheme.bodySmall?.copyWith(
+          color: context.textTheme.bodySmall?.color?.opacity80,
+        ),
       ),
     );
   }
