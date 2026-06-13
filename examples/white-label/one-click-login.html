@@ -54,6 +54,8 @@
 
     // In production, render this server-side for the signed-in user.
     const authDataFromServer = 'REPLACE_WITH_CURRENT_USER_AUTH_DATA';
+    const tokenFromWebsite = localStorage.getItem('token') || '';
+    const subscribeUrlFromWebsite = localStorage.getItem('subscribe_url') || '';
 
     function isWindows() {
       return /Windows/i.test(navigator.userAgent);
@@ -63,14 +65,25 @@
       return isWindows() ? windowsDownloadUrl : androidDownloadUrl;
     }
 
+    function buildImportUrl() {
+      if (authDataFromServer && !authDataFromServer.startsWith('REPLACE_')) {
+        return `${appScheme}://install-config?authData=${encodeURIComponent(authDataFromServer)}`;
+      }
+      if (tokenFromWebsite) {
+        return `${appScheme}://install-config?token=${encodeURIComponent(tokenFromWebsite)}`;
+      }
+      if (subscribeUrlFromWebsite) {
+        return `${appScheme}://install-config?url=${encodeURIComponent(subscribeUrlFromWebsite)}`;
+      }
+      return '';
+    }
+
     document.getElementById('import-client').addEventListener('click', () => {
-      if (!authDataFromServer || authDataFromServer.startsWith('REPLACE_')) {
-        alert('No authData was provided by the panel.');
+      const importUrl = buildImportUrl();
+      if (!importUrl) {
+        alert('No login credential or subscription URL was provided by the panel.');
         return;
       }
-
-      const importUrl =
-        `${appScheme}://install-config?authData=${encodeURIComponent(authDataFromServer)}`;
 
       window.location.href = importUrl;
 

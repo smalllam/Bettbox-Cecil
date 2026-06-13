@@ -9,16 +9,20 @@ Use the same custom scheme on Android and Windows:
 
 ```text
 yourapp://install-config?authData=<url-encoded-auth-data>
+yourapp://install-config?token=<url-encoded-token>
+yourapp://install-config?url=<url-encoded-subscription-url>
 ```
 
-`authData` is the authenticated V2Board/xiaoV2b user credential returned by the
-panel. The client stores it locally, fetches the user's subscription from the
-configured panel API, downloads the subscription config, and hides the raw
-subscription URL from the user.
+`authData` is the preferred authenticated V2Board/xiaoV2b user credential
+returned by the panel. `token` is accepted for panels that only expose a user
+token on the website. For both credential formats, the client stores the login
+state locally, fetches the user's subscription from the configured panel API,
+downloads the subscription config, and hides the raw subscription URL from the
+user.
 
-Raw subscription URL import is intentionally not accepted in Cecil-style
-white-label builds. If a link uses `url=<subscription-url>`, the client rejects
-it and asks the user to import from the official website with `authData`.
+`url` is accepted as a compatibility fallback for older websites. Prefer
+`authData` or `token` whenever possible because raw subscription URLs are
+credentials and can be copied or leaked more easily.
 
 ## Client configuration
 
@@ -40,14 +44,16 @@ Windows registers the scheme during installer setup.
 
 ## Website button
 
-Use `encodeURIComponent` before appending `authData` to the URL.
+Use `encodeURIComponent` before appending any credential or subscription URL.
 
 ```html
 <button id="import-client">Import to client</button>
 
 <script>
   const appScheme = 'yourapp';
-  const authData = window.currentUserAuthData;
+  const authData = window.currentUserAuthData || '';
+  const token = localStorage.getItem('token') || '';
+  const subscribeUrl = localStorage.getItem('subscribe_url') || '';
   const androidDownloadUrl = 'https://example.com/download/yourapp.apk';
   const windowsDownloadUrl = 'https://example.com/download/yourapp-setup.exe';
 
@@ -59,14 +65,26 @@ Use `encodeURIComponent` before appending `authData` to the URL.
     return isWindows() ? windowsDownloadUrl : androidDownloadUrl;
   }
 
+  function buildImportUrl() {
+    if (authData) {
+      return `${appScheme}://install-config?authData=${encodeURIComponent(authData)}`;
+    }
+    if (token) {
+      return `${appScheme}://install-config?token=${encodeURIComponent(token)}`;
+    }
+    if (subscribeUrl) {
+      return `${appScheme}://install-config?url=${encodeURIComponent(subscribeUrl)}`;
+    }
+    return '';
+  }
+
   document.getElementById('import-client').addEventListener('click', () => {
-    if (!authData) {
-      alert('Please sign in first.');
+    const importUrl = buildImportUrl();
+    if (!importUrl) {
+      alert('Please sign in first, then refresh this page.');
       return;
     }
 
-    const importUrl =
-      `${appScheme}://install-config?authData=${encodeURIComponent(authData)}`;
     const openedAt = Date.now();
     window.location.href = importUrl;
 
@@ -94,6 +112,7 @@ Windows:
 
 ```powershell
 Start-Process "yourapp://install-config?authData=TEST_AUTH_DATA"
+Start-Process "yourapp://install-config?token=TEST_TOKEN"
 ```
 
 Android:
@@ -104,14 +123,16 @@ adb shell am start \
   -d "yourapp://install-config?authData=TEST_AUTH_DATA"
 ```
 
-Use a real `authData` from a test user when validating subscription sync.
+Use a real `authData` or token from a test user when validating subscription
+sync.
 
 ## Security notes
 
 - Generate `authData` only for the currently signed-in website user.
 - Serve the website over HTTPS.
-- Do not put the raw subscription URL in the page.
-- Treat `authData` like a login credential. Avoid writing it to analytics,
-  logs, screenshots, or public support tickets.
+- Avoid raw subscription URL import unless you need it for backward
+  compatibility.
+- Treat `authData`, `token`, and subscription URLs like login credentials. Avoid
+  writing them to analytics, logs, screenshots, or public support tickets.
 - If your panel can rotate auth data, rotate it when the user changes password
   or signs out of all devices.

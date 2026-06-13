@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:archive/archive_io.dart';
 import 'package:bett_box/white_label/white_label_api.dart';
+import 'package:bett_box/white_label/white_label_backend_proxy.dart';
 import 'package:bett_box/white_label/white_label_config.dart';
 import 'package:bett_box/white_label/white_label_strings.dart';
 import 'package:bett_box/white_label/white_label_update.dart';
@@ -43,8 +44,10 @@ class AppController {
   Completer<void>? _exitLock;
   int _backgroundLoadVersion = 0;
 
+  Completer<void>? _applyProfileLock;
   int _updateGroupsRetryCount = 0;
   bool _isUpdatingGroups = false;
+  bool _rerunUpdateGroups = false;
 
   AppController(this.context, WidgetRef ref) : _ref = ref;
 
@@ -496,14 +499,33 @@ class AppController {
     await updateProviders();
   }
 
+  Future<void> _runApplyProfileLocked(Future<void> Function() task) async {
+    while (_applyProfileLock != null) {
+      await _applyProfileLock!.future;
+    }
+    final lock = Completer<void>();
+    _applyProfileLock = lock;
+    try {
+      await task();
+    } finally {
+      lock.complete();
+      if (identical(_applyProfileLock, lock)) {
+        _applyProfileLock = null;
+      }
+    }
+  }
+
   Future applyProfile({bool silence = false}) async {
     if (silence) {
-      await _applyProfile();
-    } else {
-      await safeRun(() async {
-        await _applyProfile();
-      }, needLoading: true);
+      await _runApplyProfileLocked(_applyProfile);
+      addCheckIpNumDebounce();
+      return;
     }
+    await safeRun(() async {
+      await _runApplyProfileLocked(() async {
+        await _applyProfile();
+      });
+    }, needLoading: true);
     addCheckIpNumDebounce();
   }
 
@@ -572,7 +594,8 @@ class AppController {
 
   Future<void> updateGroups() async {
     if (_isUpdatingGroups) {
-      commonPrint.log('updateGroups already in progress, skipping');
+      _rerunUpdateGroups = true;
+      commonPrint.log('updateGroups already in progress, queueing rerun');
       return;
     }
     _isUpdatingGroups = true;
@@ -580,12 +603,15 @@ class AppController {
     try {
       final currentGroups = _ref.read(groupsProvider);
       final isInitialDesktopLoad = system.isDesktop && currentGroups.isEmpty;
-      final maxAttempts = isInitialDesktopLoad ? 6 : 4;
+      final isInitialLoad = currentGroups.isEmpty;
+      final maxAttempts = isInitialDesktopLoad ? 12 : (isInitialLoad ? 8 : 4);
+      final attemptDelay = isInitialLoad
+          ? const Duration(milliseconds: 500)
+          : const Duration(milliseconds: 200);
 
-      final newGroups = await retry(
-        task: clashCore.getProxiesGroups,
-        retryIf: (res) => res.isEmpty,
+      final newGroups = await _loadProxyGroups(
         maxAttempts: maxAttempts,
+        delay: attemptDelay,
       );
 
       final currentProfile = _ref.read(currentProfileProvider);
@@ -616,7 +642,9 @@ class AppController {
         }
       }
 
-      _ref.read(groupsProvider.notifier).value = newGroups;
+      if (newGroups.isNotEmpty) {
+        _ref.read(groupsProvider.notifier).value = newGroups;
+      }
       _updateGroupsRetryCount = 0;
       return;
     } catch (e) {
@@ -643,12 +671,30 @@ class AppController {
       commonPrint.log(
         'updateGroups initial load failed ($_updateGroupsRetryCount/$maxRetryRounds), scheduling retry in ${retryDelay.inSeconds}s: $e',
       );
-      Future.delayed(retryDelay, () {
-        updateGroups();
-      });
+      Future.delayed(retryDelay, updateGroups);
     } finally {
       _isUpdatingGroups = false;
+      if (_rerunUpdateGroups) {
+        _rerunUpdateGroups = false;
+        Future.microtask(updateGroups);
+      }
     }
+  }
+
+  Future<List<Group>> _loadProxyGroups({
+    required int maxAttempts,
+    required Duration delay,
+  }) async {
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      final groups = await clashCore.getProxiesGroups();
+      if (groups.isNotEmpty) {
+        return groups;
+      }
+      if (attempt < maxAttempts) {
+        await Future.delayed(delay);
+      }
+    }
+    throw 'proxy groups are empty after $maxAttempts attempts';
   }
 
   Future<void> updateProfiles() async {
@@ -1046,23 +1092,123 @@ class AppController {
   }
 
   void initLink() {
-    linkManager.initAppLinksListen((link) async {
-      final strings = whiteLabelStringsOf(context);
-      final authData = link.authData?.trim() ?? '';
-      if (authData.isNotEmpty) {
-        await WhiteLabelApi.saveSession(
-          WhiteLabelSession(token: '', authData: authData, email: ''),
-        );
-        WhiteLabelApi.notifyAuthChanged();
-        globalState.showNotifier(strings.oneClickImportReceived);
-        return;
-      }
-
-      final url = link.url?.trim() ?? '';
-      if (url.isNotEmpty) {
-        globalState.showNotifier(strings.unsupportedImportLink);
-      }
+    linkManager.initAppLinksListen((link) {
+      unawaited(_handleInstallConfigLink(link));
     });
+  }
+
+  Future<void> _handleInstallConfigLink(InstallConfigLink link) async {
+    final strings = whiteLabelStringsOf(context);
+    if (link.isEmpty) {
+      globalState.showNotifier('一键导入数据为空，请刷新官网后重试。');
+      return;
+    }
+
+    final token = link.token?.trim() ?? '';
+    final authData = link.authData?.trim() ?? '';
+    if (token.isNotEmpty || authData.isNotEmpty) {
+      final currentSession = await WhiteLabelApi.loadSession();
+      final session = WhiteLabelSession(
+        token: token,
+        authData: authData,
+        email: currentSession?.email ?? '',
+      );
+      globalState.showNotifier(strings.oneClickImportReceived);
+      try {
+        await _syncWhiteLabelSubscription(session);
+        WhiteLabelApi.notifyAuthChanged();
+        globalState.showNotifier(strings.subscriptionUpdated);
+      } catch (e) {
+        globalState.showNotifier(e.toString());
+      }
+      return;
+    }
+
+    final url = link.url?.trim() ?? '';
+    if (url.isNotEmpty) {
+      globalState.showNotifier(strings.oneClickImportReceived);
+      try {
+        await _importWhiteLabelSubscriptionUrl(url);
+        globalState.showNotifier(strings.subscriptionUpdated);
+      } catch (e) {
+        globalState.showNotifier(e.toString());
+      }
+      return;
+    }
+
+    globalState.showNotifier(strings.unsupportedImportLink);
+  }
+
+  Future<void> _syncWhiteLabelSubscription(WhiteLabelSession session) async {
+    try {
+      final subscription = await WhiteLabelApi.fetchSubscription(session);
+      final savedSession = WhiteLabelSession(
+        token: session.token,
+        authData: session.authData,
+        email: subscription.email.isNotEmpty
+            ? subscription.email
+            : session.email,
+      );
+      await WhiteLabelApi.saveSession(savedSession);
+      await _importWhiteLabelSubscriptionUrl(
+        subscription.subscribeUrl,
+        subscriptionInfo: SubscriptionInfo(
+          upload: subscription.upload,
+          download: subscription.download,
+          total: subscription.transferEnable,
+          expire: subscription.expiredAt,
+        ),
+      );
+    } finally {
+      await WhiteLabelBackendProxy.stopIfTemporary();
+    }
+  }
+
+  Future<void> _importWhiteLabelSubscriptionUrl(
+    String url, {
+    SubscriptionInfo? subscriptionInfo,
+  }) async {
+    try {
+      final current = _ref
+          .read(profilesProvider)
+          .getProfile(whiteLabelProfileId);
+      final profile =
+          (current ??
+                  Profile(
+                    id: whiteLabelProfileId,
+                    label: whiteLabelDisplayName,
+                    autoUpdateDuration: defaultUpdateDuration,
+                  ))
+              .copyWith(
+                label: whiteLabelDisplayName,
+                url: url,
+                autoUpdate: true,
+                autoUpdateDuration: defaultUpdateDuration,
+                subscriptionInfo: subscriptionInfo ?? current?.subscriptionInfo,
+              );
+
+      final downloaded = await WhiteLabelApi.downloadConfig(profile.url);
+      final updatedProfile = await profile
+          .copyWith(
+            label:
+                profile.label ??
+                utils.getFileNameForDisposition(
+                  downloaded.contentDisposition,
+                ) ??
+                profile.id,
+            subscriptionInfo: downloaded.subscriptionUserInfo == null
+                ? profile.subscriptionInfo
+                : SubscriptionInfo.formHString(downloaded.subscriptionUserInfo),
+          )
+          .saveFile(downloaded.bytes);
+      _ref.read(profilesProvider.notifier).setProfile(updatedProfile);
+      _ref.read(currentProfileIdProvider.notifier).value = whiteLabelProfileId;
+      toPage(PageLabel.dashboard);
+      await savePreferences();
+      await applyProfile(silence: true);
+    } finally {
+      await WhiteLabelBackendProxy.stopIfTemporary();
+    }
   }
 
   Future<bool?> showDisclaimer() async {
