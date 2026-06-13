@@ -8,6 +8,7 @@ import 'package:bett_box/plugins/service.dart' as vpn_service;
 import 'package:bett_box/plugins/tile.dart';
 import 'package:bett_box/plugins/vpn.dart';
 import 'package:bett_box/state.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -21,10 +22,13 @@ import 'models/models.dart';
 ReceivePort? _serviceReceiverPort;
 ReceivePort? _messageReceiverPort;
 
-Future<void> main() async {
-  globalState.isService = false;
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (runWebViewTitleBarWidget(args)) {
+    return;
+  }
 
+  globalState.isService = false;
   PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
 
   final version = await system.version;
