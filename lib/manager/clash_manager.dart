@@ -6,6 +6,7 @@ import 'package:bett_box/providers/app.dart';
 import 'package:bett_box/providers/config.dart';
 import 'package:bett_box/providers/state.dart';
 import 'package:bett_box/state.dart';
+import 'package:bett_box/white_label/white_label_sensitive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,6 +85,10 @@ class _ClashContainerState extends ConsumerState<ClashManager>
 
   @override
   void onRequest(TrackerInfo trackerInfo) async {
+    if (isWhiteLabelSensitiveTrackerInfo(trackerInfo)) {
+      super.onRequest(trackerInfo);
+      return;
+    }
     ref.read(requestsProvider.notifier).addRequest(trackerInfo);
     super.onRequest(trackerInfo);
   }

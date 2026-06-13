@@ -2,6 +2,7 @@ import 'package:bett_box/common/common.dart';
 import 'package:bett_box/enum/enum.dart';
 import 'package:bett_box/models/models.dart';
 import 'package:bett_box/state.dart';
+import 'package:bett_box/white_label/white_label_sensitive.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -53,14 +54,18 @@ final filteredLogsProvider = Provider<List<Log>>((ref) {
 
   return logs.where((item) {
     if (query.isNotEmpty) {
-      final matchesQuery = item.payload.toLowerCase().contains(query) ||
+      final matchesQuery =
+          item.payload.toLowerCase().contains(query) ||
           item.logLevel.name.toLowerCase().contains(query) ||
           item.dateTime.toLowerCase().contains(query);
       if (!matchesQuery) return false;
     }
     if (keywords.isNotEmpty) {
-      final itemStr = '${item.payload} ${item.logLevel.name} ${item.dateTime}'.toLowerCase();
-      final matchesKeywords = keywords.every((keyword) => itemStr.contains(keyword.toLowerCase()));
+      final itemStr = '${item.payload} ${item.logLevel.name} ${item.dateTime}'
+          .toLowerCase();
+      final matchesKeywords = keywords.every(
+        (keyword) => itemStr.contains(keyword.toLowerCase()),
+      );
       if (!matchesKeywords) return false;
     }
     return true;
@@ -80,6 +85,7 @@ class Requests extends _$Requests with AutoDisposeNotifierMixin {
   }
 
   void addRequest(TrackerInfo value) {
+    if (isWhiteLabelSensitiveTrackerInfo(value)) return;
     state = state.copyWith()..add(value);
   }
 
@@ -98,13 +104,15 @@ final filteredRequestsProvider = Provider<List<TrackerInfo>>((ref) {
   final keywords = ref.watch(requestsKeywordsProvider);
 
   return requests.where((item) {
+    if (isWhiteLabelSensitiveTrackerInfo(item)) return false;
     if (query.isNotEmpty) {
       final networkText = item.metadata.network.toLowerCase();
       final hostText = item.metadata.host.toLowerCase();
       final destinationIPText = item.metadata.destinationIP.toLowerCase();
       final processText = item.metadata.process.toLowerCase();
       final chainsText = item.chains.join('').toLowerCase();
-      final matchesQuery = networkText.contains(query) ||
+      final matchesQuery =
+          networkText.contains(query) ||
           hostText.contains(query) ||
           destinationIPText.contains(query) ||
           processText.contains(query) ||
@@ -452,7 +460,9 @@ class IsSmartStopped extends _$IsSmartStopped {
 final connectionsProvider = StateProvider<List<TrackerInfo>>((ref) => []);
 final connectionsSearchProvider = StateProvider<String>((ref) => '');
 final connectionsKeywordsProvider = StateProvider<List<String>>((ref) => []);
-final connectionsSortProvider = StateProvider<ConnectionsSortType>((ref) => ConnectionsSortType.defaultSort);
+final connectionsSortProvider = StateProvider<ConnectionsSortType>(
+  (ref) => ConnectionsSortType.defaultSort,
+);
 
 final filteredConnectionsProvider = Provider<List<TrackerInfo>>((ref) {
   final connections = ref.watch(connectionsProvider);
@@ -460,13 +470,15 @@ final filteredConnectionsProvider = Provider<List<TrackerInfo>>((ref) {
   final keywords = ref.watch(connectionsKeywordsProvider);
 
   final filtered = connections.where((item) {
+    if (isWhiteLabelSensitiveTrackerInfo(item)) return false;
     if (query.isNotEmpty) {
       final networkText = item.metadata.network.toLowerCase();
       final hostText = item.metadata.host.toLowerCase();
       final destinationIPText = item.metadata.destinationIP.toLowerCase();
       final processText = item.metadata.process.toLowerCase();
       final chainsText = item.chains.join('').toLowerCase();
-      final matchesQuery = networkText.contains(query) ||
+      final matchesQuery =
+          networkText.contains(query) ||
           hostText.contains(query) ||
           destinationIPText.contains(query) ||
           processText.contains(query) ||
